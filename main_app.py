@@ -20,7 +20,7 @@ heart_disease_model = pickle.load(open(f'{working_dir}/heart_disease_model.sav',
 
 parkinsons_model = pickle.load(open(f'{working_dir}/parkinsons_model.sav', 'rb'))
 
-
+bloodTest_model = pickle.load(open(f'{working_dir}/xgb_classifier_model.pkl', 'rb'))
 
 # sidebar for navigation
 with st.sidebar:
@@ -28,9 +28,10 @@ with st.sidebar:
 
                            ['Diabetes Prediction',
                             'Heart Disease Prediction',
-                            'Parkinsons Prediction'],
+                            'Parkinsons Prediction'
+                           'General Blood Test],
                            menu_icon='hospital-fill',
-                           icons=['activity', 'heart', 'person'],
+                           icons=['activity', 'heart', 'person', 'droplet'],
                            default_index=0)
 
 
@@ -250,3 +251,78 @@ if selected == "Parkinsons Prediction":
             parkinsons_diagnosis = "The person does not have Parkinson's disease"
 
     st.success(parkinsons_diagnosis)
+
+
+
+# Disease Prediction Page
+if selected == "Parkinsons Prediction":
+  st.title('Disease Prediction using Machine Learning')
+
+  # Create input fields for medical parameters
+  st.write("Please provide the following medical details:")
+
+  col1, col2, col3 = st.columns(3)
+
+  with col1:
+      Glucose = st.text_input('Glucose Level')
+      Hemoglobin = st.text_input('Hemoglobin Level')
+      Red_Blood_Cells = st.text_input('Red Blood Cells count')
+
+  with col2:
+      Cholesterol = st.text_input('Cholesterol Level')
+      Platelets = st.text_input('Platelet Count')
+      White_Blood_Cells = st.text_input('White Blood Cells count')
+
+  with col3:
+      HbA1c = st.text_input('HbA1c Level')
+      LDL_Cholesterol = st.text_input('LDL Cholesterol')
+      HDL_Cholesterol = st.text_input('HDL Cholesterol')
+
+  # Additional inputs
+  col4, col5 = st.columns(2)
+
+  with col4:
+      ALT = st.text_input('ALT Level')
+      AST = st.text_input('AST Level')
+      Heart_Rate = st.text_input('Heart Rate')
+
+  with col5:
+      Creatinine = st.text_input('Creatinine Level')
+      Troponin = st.text_input('Troponin Level')
+      C_reactive_Protein = st.text_input('C-reactive Protein Level')
+
+  # Prediction code
+  disease_diagnosis = ''
+
+  # Create a button for Prediction
+  if st.button('Predict Disease'):
+      # Collect user inputs
+      user_input = [Glucose, Cholesterol, Hemoglobin, Platelets, White_Blood_Cells,
+                  Red_Blood_Cells, HbA1c, LDL_Cholesterol, HDL_Cholesterol,
+                  ALT, AST, Heart_Rate, Creatinine, Troponin, C_reactive_Protein]
+    
+      # Convert all inputs to float
+      user_input = np.array([float(x) for x in user_input]).reshape(1, -1)
+    
+      # Make a prediction
+      prediction = model.predict(user_input)[0]
+
+      # Interpret the prediction based on encoding
+      if prediction == 2:
+          disease_diagnosis = 'The person is Healthy'
+      elif prediction == 1:
+          disease_diagnosis = 'The person has Diabetes'
+      elif prediction == 4:
+          disease_diagnosis = 'The person has Thalassemia'
+      elif prediction == 0:
+          disease_diagnosis = 'The person has Anemia'
+      elif prediction == 5:
+          disease_diagnosis = 'The person has Thrombocytosis'
+      elif prediction == 3:
+          disease_diagnosis = 'The person has Heart Disease'
+      else:
+          disease_diagnosis = 'Disease condition is unclear'
+
+      # Display the diagnosis
+      st.success(disease_diagnosis)
+
