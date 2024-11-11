@@ -254,7 +254,7 @@ if selected == "Parkinsons Prediction":
 
 
 # Disease Prediction Page
-if selected == "Parkinsons Prediction":
+if selected == "General Blood Test":
   st.title('Disease Prediction using Machine Learning')
 
   # Create input fields for medical parameters
