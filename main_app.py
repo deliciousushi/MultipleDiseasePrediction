@@ -19,7 +19,11 @@ heart_disease_model = pickle.load(open(f'{working_dir}/heart_disease_model.sav',
 
 parkinsons_model = pickle.load(open(f'{working_dir}/parkinsons_model.sav', 'rb'))
 
-bloodTest_model = pickle.load(open(f'{working_dir}/xgb_classifier_model.pkl', 'rb'))
+import joblib  # For loading the model
+import numpy as np
+
+# Load the model from the .pkl file
+model = joblib.load('xgb_classifier_model.pkl')
 
 # sidebar for navigation
 with st.sidebar:
@@ -304,7 +308,7 @@ if selected == "Parkinsons Prediction":
       user_input = np.array([float(x) for x in user_input]).reshape(1, -1)
     
       # Make a prediction
-      prediction = bloodTest_model.predict(user_input)[0]
+      prediction = model.predict(user_input)[0]
 
       # Interpret the prediction based on encoding
       if prediction == 2:
