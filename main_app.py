@@ -28,7 +28,7 @@ with st.sidebar:
                            ['Diabetes Prediction',
                             'Heart Disease Prediction',
                             'Parkinsons Prediction'
-                           'General Blood Test],
+                           'General Blood Test'],
                            menu_icon='hospital-fill',
                            icons=['activity', 'heart', 'person', 'droplet'],
                            default_index=0)
