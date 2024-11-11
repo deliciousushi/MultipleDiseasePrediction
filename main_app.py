@@ -305,7 +305,7 @@ if selected == "General Blood Test":
       user_input = np.array([float(x) for x in user_input]).reshape(1, -1)
     
       # Make a prediction
-      prediction = model.predict(user_input)[0]
+      prediction = bloodTest_model.predict(user_input)[0]
 
       # Interpret the prediction based on encoding
       if prediction == 2:
