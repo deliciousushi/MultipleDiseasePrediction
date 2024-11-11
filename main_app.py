@@ -344,5 +344,5 @@ if selected == "General Blood Test":
         
         # Display the diagnosis
         st.success(disease_diagnosis)
-  st.success(disease_diagnosis)
+  
 
