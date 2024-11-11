@@ -256,73 +256,93 @@ if selected == "Parkinsons Prediction":
 
 # Disease Prediction Page
 if selected == "General Blood Test":
-  st.title('Disease Prediction using Machine Learning')
+    st.title('Disease Prediction using Machine Learning')
 
-  # Create input fields for medical parameters
-  st.write("Please provide the following medical details:")
+    # Create input fields for medical parameters
+    st.write("Please provide the following medical details:")
 
-  col1, col2, col3 = st.columns(3)
+    # Split columns into manageable groups for better layout
+    col1, col2, col3 = st.columns(3)
 
-  with col1:
-      Glucose = st.text_input('Glucose Level')
-      Hemoglobin = st.text_input('Hemoglobin Level')
-      Red_Blood_Cells = st.text_input('Red Blood Cells count')
+    # First group of parameters
+    with col1:
+        Glucose = st.text_input('Glucose Level')
+        Hemoglobin = st.text_input('Hemoglobin Level')
+        Red_Blood_Cells = st.text_input('Red Blood Cells count')
+        Hematocrit = st.text_input('Hematocrit Level')
+        MCV = st.text_input('Mean Corpuscular Volume (MCV)')
 
-  with col2:
-      Cholesterol = st.text_input('Cholesterol Level')
-      Platelets = st.text_input('Platelet Count')
-      White_Blood_Cells = st.text_input('White Blood Cells count')
+    with col2:
+        MCH = st.text_input('Mean Corpuscular Hemoglobin (MCH)')
+        MCHC = st.text_input('Mean Corpuscular Hemoglobin Concentration (MCHC)')
+        Cholesterol = st.text_input('Cholesterol Level')
+        Platelets = st.text_input('Platelet Count')
+        White_Blood_Cells = st.text_input('White Blood Cells count')
 
-  with col3:
-      HbA1c = st.text_input('HbA1c Level')
-      LDL_Cholesterol = st.text_input('LDL Cholesterol')
-      HDL_Cholesterol = st.text_input('HDL Cholesterol')
+    with col3:
+        Insulin = st.text_input('Insulin Level')
+        BMI = st.text_input('Body Mass Index (BMI)')
+        Systolic_Blood_Pressure = st.text_input('Systolic Blood Pressure')
+        Diastolic_Blood_Pressure = st.text_input('Diastolic Blood Pressure')
+        Triglycerides = st.text_input('Triglycerides Level')
 
-  # Additional inputs
-  col4, col5 = st.columns(2)
+    # Second group of parameters
+    col4, col5 = st.columns(2)
 
-  with col4:
-      ALT = st.text_input('ALT Level')
-      AST = st.text_input('AST Level')
-      Heart_Rate = st.text_input('Heart Rate')
+    with col4:
+        HbA1c = st.text_input('HbA1c Level')
+        LDL_Cholesterol = st.text_input('LDL Cholesterol')
+        HDL_Cholesterol = st.text_input('HDL Cholesterol')
+        ALT = st.text_input('ALT Level')
 
-  with col5:
-      Creatinine = st.text_input('Creatinine Level')
-      Troponin = st.text_input('Troponin Level')
-      C_reactive_Protein = st.text_input('C-reactive Protein Level')
+    with col5:
+        AST = st.text_input('AST Level')
+        Heart_Rate = st.text_input('Heart Rate')
+        Creatinine = st.text_input('Creatinine Level')
+        Troponin = st.text_input('Troponin Level')
+        C_reactive_Protein = st.text_input('C-reactive Protein Level')
 
-  # Prediction code
-  disease_diagnosis = ''
+    # Prediction code
+    disease_diagnosis = ''
 
-  # Create a button for Prediction
-  if st.button('Predict Disease'):
-      # Collect user inputs
-      user_input = [Glucose, Cholesterol, Hemoglobin, Platelets, White_Blood_Cells,
-                  Red_Blood_Cells, HbA1c, LDL_Cholesterol, HDL_Cholesterol,
-                  ALT, AST, Heart_Rate, Creatinine, Troponin, C_reactive_Protein]
-    
-      # Convert all inputs to float
-      user_input = np.array([float(x) for x in user_input]).reshape(1, -1)
-    
-      # Make a prediction
-      prediction = bloodTest_model.predict(user_input)[0]
+    # Create a button for Prediction
+    if st.button('Predict Disease'):
+        # Collect user inputs
+        user_input = [
+            Glucose, Cholesterol, Hemoglobin, Platelets, White_Blood_Cells,
+            Red_Blood_Cells, Hematocrit, MCV, MCH, MCHC, Insulin, BMI,
+            Systolic_Blood_Pressure, Diastolic_Blood_Pressure, Triglycerides,
+            HbA1c, LDL_Cholesterol, HDL_Cholesterol, ALT, AST, Heart_Rate,
+            Creatinine, Troponin, C_reactive_Protein
+        ]
 
-      # Interpret the prediction based on encoding
-      if prediction == 2:
-          disease_diagnosis = 'The person is Healthy'
-      elif prediction == 1:
-          disease_diagnosis = 'The person has Diabetes'
-      elif prediction == 4:
-          disease_diagnosis = 'The person has Thalassemia'
-      elif prediction == 0:
-          disease_diagnosis = 'The person has Anemia'
-      elif prediction == 5:
-          disease_diagnosis = 'The person has Thrombocytosis'
-      elif prediction == 3:
-          disease_diagnosis = 'The person has Heart Disease'
-      else:
-          disease_diagnosis = 'Disease condition is unclear'
+        # Convert all inputs to float and handle any missing values
+        try:
+            user_input = np.array([float(x) if x != "" else 0.0 for x in user_input]).reshape(1, -1)
 
-      # Display the diagnosis
-      st.success(disease_diagnosis)
+            # Make a prediction
+            prediction = bloodTest_model.predict(user_input)[0]
+
+            # Interpret the prediction based on encoding
+            if prediction == 2:
+                disease_diagnosis = 'The person is Healthy'
+            elif prediction == 1:
+                disease_diagnosis = 'The person has Diabetes'
+            elif prediction == 4:
+                disease_diagnosis = 'The person has Thalassemia'
+            elif prediction == 0:
+                disease_diagnosis = 'The person has Anemia'
+            elif prediction == 5:
+                disease_diagnosis = 'The person has Thrombocytosis'
+            elif prediction == 3:
+                disease_diagnosis = 'The person has Heart Disease'
+            else:
+                disease_diagnosis = 'Disease condition is unclear'
+
+        except ValueError:
+            st.error("Please enter valid numbers for all input fields.")
+        
+        # Display the diagnosis
+        st.success(disease_diagnosis)
+  st.success(disease_diagnosis)
 
