@@ -31,61 +31,75 @@ with st.sidebar:
                            icons=['activity', 'heart', 'person'],
                            default_index=0)
 
-
-# Diabetes Prediction Page
+# Streamlit App for Diabetes Prediction
 if selected == 'Diabetes Prediction':
 
-    # page title
+    # Page title
     st.title('Diabetes Prediction using ML')
 
-    # getting the input data from the user
+    # User inputs
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        Pregnancies = st.text_input('Number of Pregnancies')
+        gender = st.selectbox('Gender', ['Male', 'Female', 'Other'])
+        age = st.number_input('Age', min_value=0, max_value=120, step=1, value=25)
 
     with col2:
-        Glucose = st.text_input('Glucose Level')
+        hypertension = st.selectbox('Hypertension', [0, 1], help="0: No, 1: Yes")
+        heart_disease = st.selectbox('Heart Disease', [0, 1], help="0: No, 1: Yes")
 
     with col3:
-        BloodPressure = st.text_input('Blood Pressure value')
+        smoking_history = st.selectbox(
+            'Smoking History',
+            ['non-smoker', 'current', 'past_smoker']
+        )
+        bmi = st.number_input('BMI', min_value=10.0, max_value=50.0, step=0.1, value=25.0)
 
-    with col1:
-        SkinThickness = st.text_input('Skin Thickness value')
+    col4, col5 = st.columns(2)
 
-    with col2:
-        Insulin = st.text_input('Insulin Level')
+    with col4:
+        hba1c_level = st.number_input('HbA1c Level', min_value=3.0, max_value=15.0, step=0.1, value=5.0)
 
-    with col3:
-        BMI = st.text_input('BMI value')
+    with col5:
+        blood_glucose_level = st.number_input('Blood Glucose Level', min_value=50, max_value=300, step=1, value=120)
 
-    with col1:
-        DiabetesPedigreeFunction = st.text_input('Diabetes Pedigree Function value')
+    # Preprocessing
+    # Encode gender
+    gender_encoded = 1 if gender == 'Male' else (0 if gender == 'Female' else 2)
 
-    with col2:
-        Age = st.text_input('Age of the Person')
+    # Encode smoking history
+    smoking_history_encoded = {
+        'non-smoker': 0,
+        'current': 1,
+        'past_smoker': 2
+    }[smoking_history]
 
+    # Scale numerical features to match model training
+    scaler_mean = {'age': 50.0, 'bmi': 25.0, 'HbA1c_level': 5.5, 'blood_glucose_level': 120.0}
+    scaler_std = {'age': 20.0, 'bmi': 5.0, 'HbA1c_level': 1.0, 'blood_glucose_level': 30.0}
 
-    # code for Prediction
-    diab_diagnosis = ''
+    def scale(value, mean, std):
+        return (value - mean) / std
 
-    # creating a button for Prediction
+    age_scaled = scale(age, scaler_mean['age'], scaler_std['age'])
+    bmi_scaled = scale(bmi, scaler_mean['bmi'], scaler_std['bmi'])
+    hba1c_scaled = scale(hba1c_level, scaler_mean['HbA1c_level'], scaler_std['HbA1c_level'])
+    glucose_scaled = scale(blood_glucose_level, scaler_mean['blood_glucose_level'], scaler_std['blood_glucose_level'])
 
-    if st.button('Diabetes Test Result'):
+    # Input features array
+    input_data = np.array([
+        gender_encoded, age_scaled, hypertension, heart_disease,
+        smoking_history_encoded, bmi_scaled, hba1c_scaled, glucose_scaled
+    ]).reshape(1, -1)
 
-        user_input = [Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin,
-                      BMI, DiabetesPedigreeFunction, Age]
+    # Prediction
+    if st.button('Predict'):
+        prediction = model.predict(input_data)
+        prediction_label = 'Diabetes Detected' if prediction[0] == 1 else 'No Diabetes Detected'
 
-        user_input = [float(x) for x in user_input]
+        # Display result
+        st.success(prediction_label)
 
-        diab_prediction = diabetes_model.predict([user_input])
-
-        if diab_prediction[0] == 1:
-            diab_diagnosis = 'The person is diabetic'
-        else:
-            diab_diagnosis = 'The person is not diabetic'
-
-    st.success(diab_diagnosis)
 
 # Heart Disease Prediction Page
 if selected == 'Heart Disease Prediction':
