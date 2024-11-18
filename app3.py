@@ -1,5 +1,6 @@
 import os
 import pickle
+import numpy as np
 import streamlit as st
 from streamlit_option_menu import option_menu
 
@@ -106,162 +107,174 @@ if selected == 'Diabetes Prediction':
 
 # Heart Disease Prediction Page
 if selected == 'Heart Disease Prediction':
-
-    # page title
+    # Page title
     st.title('Heart Disease Prediction using ML')
 
+    # User inputs
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        age = st.text_input('Age')
+        age = st.number_input('Age', min_value=0, max_value=120, step=1)
 
     with col2:
-        sex = st.text_input('Sex')
+        sex = st.selectbox('Sex', ['Male', 'Female'])
 
     with col3:
-        cp = st.text_input('Chest Pain types')
+        cp = st.selectbox('Chest Pain Types', ['typical angina', 'atypical angina', 'non-anginal pain', 'asymptomatic'])
 
     with col1:
-        trestbps = st.text_input('Resting Blood Pressure')
+        trestbps = st.number_input('Resting Blood Pressure (mm Hg)', min_value=0)
 
     with col2:
-        chol = st.text_input('Serum Cholestoral in mg/dl')
+        chol = st.number_input('Serum Cholestoral in mg/dl', min_value=0)
 
     with col3:
-        fbs = st.text_input('Fasting Blood Sugar > 120 mg/dl')
+        fbs = st.selectbox('Fasting Blood Sugar > 120 mg/dl', ['True', 'False'])
 
     with col1:
-        restecg = st.text_input('Resting Electrocardiographic results')
+        restecg = st.selectbox('Resting Electrocardiographic Results', ['normal', 'st-T wave abnormality', 'left ventricular hypertrophy'])
 
     with col2:
-        thalach = st.text_input('Maximum Heart Rate achieved')
+        thalach = st.number_input('Maximum Heart Rate Achieved', min_value=0)
 
     with col3:
-        exang = st.text_input('Exercise Induced Angina')
+        exang = st.selectbox('Exercise Induced Angina', ['True', 'False'])
 
     with col1:
-        oldpeak = st.text_input('ST depression induced by exercise')
+        oldpeak = st.number_input('ST Depression Induced by Exercise')
 
     with col2:
-        slope = st.text_input('Slope of the peak exercise ST segment')
+        slope = st.selectbox('Slope of the Peak Exercise ST Segment', ['upsloping', 'flat', 'downsloping'])
 
     with col3:
-        ca = st.text_input('Major vessels colored by flourosopy')
+        ca = st.number_input('Number of Major Vessels Colored by Flourosopy', min_value=0, max_value=3)
 
     with col1:
-        thal = st.text_input('thal: 0 = normal; 1 = fixed defect; 2 = reversable defect')
+        thal = st.selectbox('Thalassemia', ['normal', 'fixed defect', 'reversible defect'])
 
-    # code for Prediction
+    # Heart Disease Prediction
     heart_diagnosis = ''
 
-    # creating a button for Prediction
-
     if st.button('Heart Disease Test Result'):
+        # Preprocessing
+        sex_encoded = 1 if sex == 'Male' else 0
+        fbs_encoded = 1 if fbs == 'True' else 0
+        exang_encoded = 1 if exang == 'True' else 0
+        restecg_encoded = {'normal': 0, 'st-T wave abnormality': 1, 'left ventricular hypertrophy': 2}[restecg]
+        thal_encoded = {'normal': 0, 'fixed defect': 1, 'reversible defect': 2}[thal]
+        cp_encoded = {'typical angina': 0, 'atypical angina': 1, 'non-anginal pain': 2, 'asymptomatic': 3}[cp]
+        slope_encoded = {'upsloping': 0, 'flat': 1, 'downsloping': 2}[slope]
 
-        user_input = [age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal]
-
-        user_input = [float(x) for x in user_input]
+        user_input = [age, sex_encoded, cp_encoded, trestbps, chol, fbs_encoded, restecg_encoded, thalach, exang_encoded, oldpeak, slope_encoded, ca, thal_encoded]
 
         heart_prediction = heart_disease_model.predict([user_input])
 
         if heart_prediction[0] == 1:
-            heart_diagnosis = 'The person is having heart disease'
+            heart_diagnosis = 'The person has heart disease'
         else:
-            heart_diagnosis = 'The person does not have any heart disease'
+            heart_diagnosis = 'The person does not have heart disease'
 
     st.success(heart_diagnosis)
 
-# Parkinson's Prediction Page
+
 if selected == "Parkinsons Prediction":
 
-    # page title
+    # Page title
     st.title("Parkinson's Disease Prediction using ML")
 
+    # Create columns for user input
     col1, col2, col3, col4, col5 = st.columns(5)
 
+    # User input fields for various features related to Parkinson's disease
     with col1:
-        fo = st.text_input('MDVP:Fo(Hz)')
+        fo = st.number_input('MDVP:Fo(Hz)', min_value=0.0, step=0.1)
 
     with col2:
-        fhi = st.text_input('MDVP:Fhi(Hz)')
+        fhi = st.number_input('MDVP:Fhi(Hz)', min_value=0.0, step=0.1)
 
     with col3:
-        flo = st.text_input('MDVP:Flo(Hz)')
+        flo = st.number_input('MDVP:Flo(Hz)', min_value=0.0, step=0.1)
 
     with col4:
-        Jitter_percent = st.text_input('MDVP:Jitter(%)')
+        Jitter_percent = st.number_input('MDVP:Jitter(%)', min_value=0.0, step=0.1)
 
     with col5:
-        Jitter_Abs = st.text_input('MDVP:Jitter(Abs)')
+        Jitter_Abs = st.number_input('MDVP:Jitter(Abs)', min_value=0.0, step=0.1)
 
     with col1:
-        RAP = st.text_input('MDVP:RAP')
+        RAP = st.number_input('MDVP:RAP', min_value=0.0, step=0.1)
 
     with col2:
-        PPQ = st.text_input('MDVP:PPQ')
+        PPQ = st.number_input('MDVP:PPQ', min_value=0.0, step=0.1)
 
     with col3:
-        DDP = st.text_input('Jitter:DDP')
+        DDP = st.number_input('Jitter:DDP', min_value=0.0, step=0.1)
 
     with col4:
-        Shimmer = st.text_input('MDVP:Shimmer')
+        Shimmer = st.number_input('MDVP:Shimmer', min_value=0.0, step=0.1)
 
     with col5:
-        Shimmer_dB = st.text_input('MDVP:Shimmer(dB)')
+        Shimmer_dB = st.number_input('MDVP:Shimmer(dB)', min_value=0.0, step=0.1)
 
     with col1:
-        APQ3 = st.text_input('Shimmer:APQ3')
+        APQ3 = st.number_input('Shimmer:APQ3', min_value=0.0, step=0.1)
 
     with col2:
-        APQ5 = st.text_input('Shimmer:APQ5')
+        APQ5 = st.number_input('Shimmer:APQ5', min_value=0.0, step=0.1)
 
     with col3:
-        APQ = st.text_input('MDVP:APQ')
+        APQ = st.number_input('MDVP:APQ', min_value=0.0, step=0.1)
 
     with col4:
-        DDA = st.text_input('Shimmer:DDA')
+        DDA = st.number_input('Shimmer:DDA', min_value=0.0, step=0.1)
 
     with col5:
-        NHR = st.text_input('NHR')
+        NHR = st.number_input('NHR', min_value=0.0, step=0.1)
 
     with col1:
-        HNR = st.text_input('HNR')
+        HNR = st.number_input('HNR', min_value=0.0, step=0.1)
 
     with col2:
-        RPDE = st.text_input('RPDE')
+        RPDE = st.number_input('RPDE', min_value=0.0, step=0.1)
 
     with col3:
-        DFA = st.text_input('DFA')
+        DFA = st.number_input('DFA', min_value=0.0, step=0.1)
 
     with col4:
-        spread1 = st.text_input('spread1')
+        spread1 = st.number_input('spread1', min_value=0.0, step=0.1)
 
     with col5:
-        spread2 = st.text_input('spread2')
+        spread2 = st.number_input('spread2', min_value=0.0, step=0.1)
 
     with col1:
-        D2 = st.text_input('D2')
+        D2 = st.number_input('D2', min_value=0.0, step=0.1)
 
     with col2:
-        PPE = st.text_input('PPE')
+        PPE = st.number_input('PPE', min_value=0.0, step=0.1)
 
-    # code for Prediction
+    # Code for Prediction
     parkinsons_diagnosis = ''
 
-    # creating a button for Prediction    
+    # Button for Prediction
     if st.button("Parkinson's Test Result"):
 
-        user_input = [fo, fhi, flo, Jitter_percent, Jitter_Abs,
-                      RAP, PPQ, DDP,Shimmer, Shimmer_dB, APQ3, APQ5,
-                      APQ, DDA, NHR, HNR, RPDE, DFA, spread1, spread2, D2, PPE]
+        # Collect user inputs into a list
+        user_input = [
+            fo, fhi, flo, Jitter_percent, Jitter_Abs, RAP, PPQ, DDP, Shimmer,
+            Shimmer_dB, APQ3, APQ5, APQ, DDA, NHR, HNR, RPDE, DFA, spread1, spread2, D2, PPE
+        ]
 
+        # Convert inputs to float for prediction
         user_input = [float(x) for x in user_input]
 
+        # Make prediction using the Parkinson's disease model
         parkinsons_prediction = parkinsons_model.predict([user_input])
 
+        # Diagnosis based on the prediction
         if parkinsons_prediction[0] == 1:
             parkinsons_diagnosis = "The person has Parkinson's disease"
         else:
             parkinsons_diagnosis = "The person does not have Parkinson's disease"
 
+    # Display the result
     st.success(parkinsons_diagnosis)
