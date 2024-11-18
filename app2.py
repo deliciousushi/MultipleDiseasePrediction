@@ -173,97 +173,104 @@ if selected == 'Heart Disease Prediction':
     st.success(heart_diagnosis)
 
 
-# Parkinson's Prediction Page
-if selected == "Parkinsons Prediction":
+if selected == "Parkinson's Prediction":
 
-    # page title
+    # Page title
     st.title("Parkinson's Disease Prediction using ML")
 
+    # Create columns for user input
     col1, col2, col3, col4, col5 = st.columns(5)
 
+    # User input fields for various features related to Parkinson's disease
     with col1:
-        fo = st.text_input('MDVP:Fo(Hz)')
+        fo = st.number_input('MDVP:Fo(Hz)', min_value=0.0, step=0.1)
 
     with col2:
-        fhi = st.text_input('MDVP:Fhi(Hz)')
+        fhi = st.number_input('MDVP:Fhi(Hz)', min_value=0.0, step=0.1)
 
     with col3:
-        flo = st.text_input('MDVP:Flo(Hz)')
+        flo = st.number_input('MDVP:Flo(Hz)', min_value=0.0, step=0.1)
 
     with col4:
-        Jitter_percent = st.text_input('MDVP:Jitter(%)')
+        Jitter_percent = st.number_input('MDVP:Jitter(%)', min_value=0.0, step=0.1)
 
     with col5:
-        Jitter_Abs = st.text_input('MDVP:Jitter(Abs)')
+        Jitter_Abs = st.number_input('MDVP:Jitter(Abs)', min_value=0.0, step=0.1)
 
     with col1:
-        RAP = st.text_input('MDVP:RAP')
+        RAP = st.number_input('MDVP:RAP', min_value=0.0, step=0.1)
 
     with col2:
-        PPQ = st.text_input('MDVP:PPQ')
+        PPQ = st.number_input('MDVP:PPQ', min_value=0.0, step=0.1)
 
     with col3:
-        DDP = st.text_input('Jitter:DDP')
+        DDP = st.number_input('Jitter:DDP', min_value=0.0, step=0.1)
 
     with col4:
-        Shimmer = st.text_input('MDVP:Shimmer')
+        Shimmer = st.number_input('MDVP:Shimmer', min_value=0.0, step=0.1)
 
     with col5:
-        Shimmer_dB = st.text_input('MDVP:Shimmer(dB)')
+        Shimmer_dB = st.number_input('MDVP:Shimmer(dB)', min_value=0.0, step=0.1)
 
     with col1:
-        APQ3 = st.text_input('Shimmer:APQ3')
+        APQ3 = st.number_input('Shimmer:APQ3', min_value=0.0, step=0.1)
 
     with col2:
-        APQ5 = st.text_input('Shimmer:APQ5')
+        APQ5 = st.number_input('Shimmer:APQ5', min_value=0.0, step=0.1)
 
     with col3:
-        APQ = st.text_input('MDVP:APQ')
+        APQ = st.number_input('MDVP:APQ', min_value=0.0, step=0.1)
 
     with col4:
-        DDA = st.text_input('Shimmer:DDA')
+        DDA = st.number_input('Shimmer:DDA', min_value=0.0, step=0.1)
 
     with col5:
-        NHR = st.text_input('NHR')
+        NHR = st.number_input('NHR', min_value=0.0, step=0.1)
 
     with col1:
-        HNR = st.text_input('HNR')
+        HNR = st.number_input('HNR', min_value=0.0, step=0.1)
 
     with col2:
-        RPDE = st.text_input('RPDE')
+        RPDE = st.number_input('RPDE', min_value=0.0, step=0.1)
 
     with col3:
-        DFA = st.text_input('DFA')
+        DFA = st.number_input('DFA', min_value=0.0, step=0.1)
 
     with col4:
-        spread1 = st.text_input('spread1')
+        spread1 = st.number_input('spread1', min_value=0.0, step=0.1)
 
     with col5:
-        spread2 = st.text_input('spread2')
+        spread2 = st.number_input('spread2', min_value=0.0, step=0.1)
 
     with col1:
-        D2 = st.text_input('D2')
+        D2 = st.number_input('D2', min_value=0.0, step=0.1)
 
     with col2:
-        PPE = st.text_input('PPE')
+        PPE = st.number_input('PPE', min_value=0.0, step=0.1)
 
-    # code for Prediction
+    # Code for Prediction
     parkinsons_diagnosis = ''
 
-    # creating a button for Prediction    
+    # Button for Prediction
     if st.button("Parkinson's Test Result"):
 
-        user_input = [fo, fhi, flo, Jitter_percent, Jitter_Abs,
-                      RAP, PPQ, DDP,Shimmer, Shimmer_dB, APQ3, APQ5,
-                      APQ, DDA, NHR, HNR, RPDE, DFA, spread1, spread2, D2, PPE]
+        # Collect user inputs into a list
+        user_input = [
+            fo, fhi, flo, Jitter_percent, Jitter_Abs, RAP, PPQ, DDP, Shimmer,
+            Shimmer_dB, APQ3, APQ5, APQ, DDA, NHR, HNR, RPDE, DFA, spread1, spread2, D2, PPE
+        ]
 
+        # Convert inputs to float for prediction
         user_input = [float(x) for x in user_input]
 
+        # Make prediction using the Parkinson's disease model
         parkinsons_prediction = parkinsons_model.predict([user_input])
 
+        # Diagnosis based on the prediction
         if parkinsons_prediction[0] == 1:
             parkinsons_diagnosis = "The person has Parkinson's disease"
         else:
             parkinsons_diagnosis = "The person does not have Parkinson's disease"
 
+    # Display the result
     st.success(parkinsons_diagnosis)
