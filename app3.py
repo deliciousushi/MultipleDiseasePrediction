@@ -135,7 +135,7 @@ if selected == 'Heart Disease Prediction':
         restecg = st.selectbox('Resting Electrocardiographic Results', ['normal', 'st-T wave abnormality', 'left ventricular hypertrophy'])
 
     with col2:
-        thalach = st.number_input('Maximum Heart Rate Achieved', min_value=0)
+        thalach = st.number_input('Maximum Heart Rate Achieved', min_value=0, step=0.10)
 
     with col3:
         exang = st.selectbox('Exercise Induced Angina', ['True', 'False'])
