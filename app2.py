@@ -95,7 +95,7 @@ if selected == 'Diabetes Prediction':
 
     # Prediction
     if st.button('Predict'):
-        prediction = diabetes_prediction_disease_model.predict(input_data)
+        prediction = rf_model.predict(input_data)
         prediction_label = 'Diabetes Detected' if prediction[0] == 1 else 'No Diabetes Detected'
 
         # Display result
