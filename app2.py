@@ -102,72 +102,76 @@ if selected == 'Diabetes Prediction':
         st.success(prediction_label)
 
 
-# Heart Disease Prediction Page
 if selected == 'Heart Disease Prediction':
-
-    # page title
+    # Page title
     st.title('Heart Disease Prediction using ML')
 
+    # User inputs
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        age = st.text_input('Age')
+        age = st.number_input('Age', min_value=0, max_value=120, step=1)
 
     with col2:
-        sex = st.text_input('Sex')
+        sex = st.selectbox('Sex', ['Male', 'Female'])
 
     with col3:
-        cp = st.text_input('Chest Pain types')
+        cp = st.selectbox('Chest Pain Types', ['typical angina', 'atypical angina', 'non-anginal pain', 'asymptomatic'])
 
     with col1:
-        trestbps = st.text_input('Resting Blood Pressure')
+        trestbps = st.number_input('Resting Blood Pressure (mm Hg)', min_value=0)
 
     with col2:
-        chol = st.text_input('Serum Cholestoral in mg/dl')
+        chol = st.number_input('Serum Cholestoral in mg/dl', min_value=0)
 
     with col3:
-        fbs = st.text_input('Fasting Blood Sugar > 120 mg/dl')
+        fbs = st.selectbox('Fasting Blood Sugar > 120 mg/dl', ['True', 'False'])
 
     with col1:
-        restecg = st.text_input('Resting Electrocardiographic results')
+        restecg = st.selectbox('Resting Electrocardiographic Results', ['normal', 'st-T wave abnormality', 'left ventricular hypertrophy'])
 
     with col2:
-        thalach = st.text_input('Maximum Heart Rate achieved')
+        thalach = st.number_input('Maximum Heart Rate Achieved', min_value=0)
 
     with col3:
-        exang = st.text_input('Exercise Induced Angina')
+        exang = st.selectbox('Exercise Induced Angina', ['True', 'False'])
 
     with col1:
-        oldpeak = st.text_input('ST depression induced by exercise')
+        oldpeak = st.number_input('ST Depression Induced by Exercise')
 
     with col2:
-        slope = st.text_input('Slope of the peak exercise ST segment')
+        slope = st.selectbox('Slope of the Peak Exercise ST Segment', ['upsloping', 'flat', 'downsloping'])
 
     with col3:
-        ca = st.text_input('Major vessels colored by flourosopy')
+        ca = st.number_input('Number of Major Vessels Colored by Flourosopy', min_value=0, max_value=3)
 
     with col1:
-        thal = st.text_input('thal: 0 = normal; 1 = fixed defect; 2 = reversable defect')
+        thal = st.selectbox('Thalassemia', ['normal', 'fixed defect', 'reversible defect'])
 
-    # code for Prediction
+    # Heart Disease Prediction
     heart_diagnosis = ''
 
-    # creating a button for Prediction
-
     if st.button('Heart Disease Test Result'):
+        # Preprocessing
+        sex_encoded = 1 if sex == 'Male' else 0
+        fbs_encoded = 1 if fbs == 'True' else 0
+        exang_encoded = 1 if exang == 'True' else 0
+        restecg_encoded = {'normal': 0, 'st-T wave abnormality': 1, 'left ventricular hypertrophy': 2}[restecg]
+        thal_encoded = {'normal': 0, 'fixed defect': 1, 'reversible defect': 2}[thal]
+        cp_encoded = {'typical angina': 0, 'atypical angina': 1, 'non-anginal pain': 2, 'asymptomatic': 3}[cp]
+        slope_encoded = {'upsloping': 0, 'flat': 1, 'downsloping': 2}[slope]
 
-        user_input = [age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal]
-
-        user_input = [float(x) for x in user_input]
+        user_input = [age, sex_encoded, cp_encoded, trestbps, chol, fbs_encoded, restecg_encoded, thalach, exang_encoded, oldpeak, slope_encoded, ca, thal_encoded]
 
         heart_prediction = heart_disease_model.predict([user_input])
 
         if heart_prediction[0] == 1:
-            heart_diagnosis = 'The person is having heart disease'
+            heart_diagnosis = 'The person has heart disease'
         else:
-            heart_diagnosis = 'The person does not have any heart disease'
+            heart_diagnosis = 'The person does not have heart disease'
 
     st.success(heart_diagnosis)
+
 
 # Parkinson's Prediction Page
 if selected == "Parkinsons Prediction":
