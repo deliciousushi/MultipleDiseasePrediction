@@ -135,13 +135,13 @@ if selected == 'Heart Disease Prediction':
         restecg = st.selectbox('Resting Electrocardiographic Results', ['normal', 'st-T wave abnormality', 'left ventricular hypertrophy'])
 
     with col2:
-        thalach = st.number_input('Maximum Heart Rate Achieved', min_value=0.0, step=0.10)
+        thalach = st.number_input('Maximum Heart Rate Achieved', min_value=0)
 
     with col3:
         exang = st.selectbox('Exercise Induced Angina', ['True', 'False'])
 
     with col1:
-        oldpeak = st.number_input('ST Depression Induced by Exercise')
+        oldpeak = st.number_input('ST Depression Induced by Exercise',step=0.1)
 
     with col2:
         slope = st.selectbox('Slope of the Peak Exercise ST Segment', ['upsloping', 'flat', 'downsloping'])
