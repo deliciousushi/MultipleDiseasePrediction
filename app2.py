@@ -1,4 +1,4 @@
-simport os
+import os
 import pickle
 import numpy as np
 import streamlit as st
