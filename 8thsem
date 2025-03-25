@@ -1,0 +1,120 @@
+import os
+import pickle
+import numpy as np
+import streamlit as st
+from streamlit_option_menu import option_menu
+from sklearn.preprocessing import StandardScaler
+
+# Set page configuration
+st.set_page_config(page_title="Health Assistant", layout="wide", page_icon="🧑‍⚕️")
+
+# Get working directory
+working_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Load models with exception handling
+models = {}
+model_files = {
+    "Diabetes": "diabetes_model.sav",
+    "Heart Disease": "heart_disease_model.sav",
+    "Parkinson's": "parkinsons_model.sav"
+}
+
+for key, filename in model_files.items():
+    try:
+        models[key] = pickle.load(open(f'{working_dir}/{filename}', 'rb'))
+    except Exception as e:
+        st.error(f"Error loading {key} model: {e}")
+        st.stop()
+
+# Sidebar menu
+with st.sidebar:
+    selected = option_menu(
+        'Multiple Disease Prediction System',
+        ['Home', 'Diabetes Prediction', 'Heart Disease Prediction', "Parkinson's Prediction"],
+        menu_icon='hospital-fill',
+        icons=['house', 'activity', 'heart', 'person'],
+        default_index=0
+    )
+
+# Home Page
+if selected == 'Home':
+    st.title('Welcome to Health Assistant 🏥')
+    st.write("This web app helps in predicting the likelihood of having **Diabetes, Heart Disease, or Parkinson's Disease** based on medical parameters using Machine Learning models.")
+    st.write("**Disclaimer:** This is not a substitute for professional medical advice. Always consult a doctor for accurate diagnosis.")
+
+# Diabetes Prediction Page
+elif selected == 'Diabetes Prediction':
+    st.title('Diabetes Prediction using ML')
+    
+    with st.form("diabetes_form"):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            Pregnancies = st.slider('Pregnancies', 0, 15, 1)
+            SkinThickness = st.slider('Skin Thickness (mm)', 0, 100, 20)
+            DiabetesPedigreeFunction = st.slider('Diabetes Pedigree Function', 0.0, 2.5, 0.5, step=0.01)
+        with col2:
+            Glucose = st.slider('Glucose (mg/dL)', 0, 300, 120)
+            Insulin = st.slider('Insulin (mu U/ml)', 0, 500, 80)
+            Age = st.slider('Age (years)', 0, 120, 30)
+        with col3:
+            BloodPressure = st.slider('Blood Pressure (mm Hg)', 0, 200, 80)
+            BMI = st.slider('BMI (kg/m²)', 0.0, 50.0, 25.0, step=0.1)
+        
+        submitted = st.form_submit_button("Predict")
+        if submitted:
+            user_input = np.array([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]])
+            prediction = models['Diabetes'].predict(user_input)
+            prob = models['Diabetes'].predict_proba(user_input)[0][1] * 100  # Probability score
+            
+            result = 'Diabetic' if prediction[0] == 1 else 'Not Diabetic'
+            st.success(f'Result: {result} (Confidence: {prob:.2f}%)')
+
+# Heart Disease Prediction Page
+elif selected == 'Heart Disease Prediction':
+    st.title('Heart Disease Prediction using ML')
+    
+    with st.form("heart_disease_form"):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            age = st.slider('Age', 20, 100, 50)
+            sex = st.radio('Sex', ['Male', 'Female'])
+            cp = st.selectbox('Chest Pain Type', ['Typical Angina', 'Atypical Angina', 'Non-Anginal Pain', 'Asymptomatic'])
+        with col2:
+            trestbps = st.slider('Resting Blood Pressure (mm Hg)', 80, 200, 120)
+            chol = st.slider('Cholesterol (mg/dL)', 100, 600, 200)
+            fbs = st.radio('Fasting Blood Sugar > 120 mg/dL', ['Yes', 'No'])
+        with col3:
+            restecg = st.selectbox('Resting ECG', ['Normal', 'ST-T wave abnormality', 'Left ventricular hypertrophy'])
+            thalach = st.slider('Max Heart Rate', 60, 220, 150)
+            exang = st.radio('Exercise Induced Angina', ['Yes', 'No'])
+        
+        submitted = st.form_submit_button("Predict")
+        if submitted:
+            sex_encoded = 1 if sex == 'Male' else 0
+            fbs_encoded = 1 if fbs == 'Yes' else 0
+            exang_encoded = 1 if exang == 'Yes' else 0
+            restecg_encoded = ['Normal', 'ST-T wave abnormality', 'Left ventricular hypertrophy'].index(restecg)
+            cp_encoded = ['Typical Angina', 'Atypical Angina', 'Non-Anginal Pain', 'Asymptomatic'].index(cp)
+            
+            user_input = np.array([[age, sex_encoded, cp_encoded, trestbps, chol, fbs_encoded, restecg_encoded, thalach, exang_encoded]])
+            prediction = models['Heart Disease'].predict(user_input)
+            prob = models['Heart Disease'].predict_proba(user_input)[0][1] * 100
+            
+            result = 'Has Heart Disease' if prediction[0] == 1 else 'No Heart Disease'
+            st.success(f'Result: {result} (Confidence: {prob:.2f}%)')
+
+# Parkinson's Prediction Page
+elif selected == "Parkinson's Prediction":
+    st.title("Parkinson's Disease Prediction using ML")
+    
+    with st.form("parkinsons_form"):
+        features = [st.slider(f'Feature {i+1}', 0.0, 10.0, 5.0, step=0.1) for i in range(22)]
+        submitted = st.form_submit_button("Predict")
+        
+        if submitted:
+            user_input = np.array([features])
+            prediction = models["Parkinson's"].predict(user_input)
+            prob = models["Parkinson's"].predict_proba(user_input)[0][1] * 100
+            
+            result = "Has Parkinson's Disease" if prediction[0] == 1 else "No Parkinson's Disease"
+            st.success(f'Result: {result} (Confidence: {prob:.2f}%)')
