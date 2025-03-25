@@ -100,7 +100,7 @@ if selected == "Parkinsons Prediction":
         confidence = parkinsons_model.predict_proba(user_input)[0][1] * 100
         
         if parkinsons_prediction[0] == 1:
-            st.error(f'The person has Parkinson's disease (Confidence: {confidence:.2f}%)')
+            st.error(f"The person has Parkinson's disease (Confidence: {confidence:.2f}%)")
             book_appointment("Neurology")
         else:
-            st.success(f'The person does not have Parkinson's disease (Confidence: {100-confidence:.2f}%)')
+            st.success(f"The person does not have Parkinson's disease (Confidence: {100-confidence:.2f}%)")
