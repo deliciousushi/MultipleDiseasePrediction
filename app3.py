@@ -21,15 +21,17 @@ heart_disease_model = pickle.load(open(f'{working_dir}/heart_disease_model.sav',
 
 parkinsons_model = pickle.load(open(f'{working_dir}/parkinsons_model.sav', 'rb'))
 
+kidney_model = pickle.load(open(f'{working_dir}/kidney_model.sav', 'rb'))
 # sidebar for navigation
 with st.sidebar:
     selected = option_menu('Multiple Disease Prediction System',
 
                            ['Diabetes Prediction',
                             'Heart Disease Prediction',
-                            'Parkinsons Prediction'],
+                            'Parkinsons Prediction',
+                           'Kidney Disease Prediction'],
                            menu_icon='hospital-fill',
-                           icons=['activity', 'heart', 'person'],
+                           icons=['activity', 'heart', 'person','droplet'],
                            default_index=0)
 
 
