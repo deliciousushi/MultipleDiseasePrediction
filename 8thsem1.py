@@ -96,7 +96,7 @@ if selected == 'Diabetes Prediction':
         
         if diab_prediction[0] == 1:
             st.error(f'The person is diabetic (Confidence: {confidence:.2f}%)')
-            book_appointment("Diabetes")
+            show_doctor_booking("Diabetes")
         else:
             st.success(f'The person is not diabetic (Confidence: {100-confidence:.2f}%)')
 
@@ -131,7 +131,7 @@ if selected == 'Heart Disease Prediction':
         
         if heart_prediction[0] == 1:
             st.error(f'The person has heart disease (Confidence: {confidence:.2f}%)')
-            book_appointment("Cardiology")
+            show_doctor_booking("Cardiology")
         else:
             st.success(f'The person does not have heart disease (Confidence: {100-confidence:.2f}%)')
 
@@ -146,6 +146,6 @@ if selected == "Parkinsons Prediction":
         
         if parkinsons_prediction[0] == 1:
             st.error(f"The person has Parkinson's disease (Confidence: {confidence:.2f}%)")
-            book_appointment("Neurology")
+            show_doctor_booking("Neurology")
         else:
             st.success(f"The person does not have Parkinson's disease (Confidence: {100-confidence:.2f}%)")
