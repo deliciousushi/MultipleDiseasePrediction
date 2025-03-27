@@ -1,9 +1,12 @@
+pip install tensorflow
 import os
 import pickle
 import numpy as np
 import pandas as pd
 import streamlit as st
 from streamlit_option_menu import option_menu
+from tensorflow import keras
+
 
 # Set page configuration
 st.set_page_config(page_title="Health Assistant", layout="wide", page_icon="🧑‍⚕️")
@@ -15,7 +18,7 @@ working_dir = os.path.dirname(os.path.abspath(__file__))
 diabetes_model = pickle.load(open(f'{working_dir}/diabetes_model.sav', 'rb'))
 heart_disease_model = pickle.load(open(f'{working_dir}/heart_disease_model.sav', 'rb'))
 parkinsons_model = pickle.load(open(f'{working_dir}/parkinsons_model.sav', 'rb'))
-kidney_model = pickle.load(open(f'{working_dir}/kidney_model.sav', 'rb'))
+kidney_model = keras.models.load_model("kidney_model.sav")
 
 # Load doctor data
 doctor_file = f'{working_dir}/doctors_list.csv'
