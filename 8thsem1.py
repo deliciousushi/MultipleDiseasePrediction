@@ -50,6 +50,7 @@ def show_doctor_booking(specialty):
         st.warning("No available doctors for this specialty.")
 
 # Kidney Disease Prediction
+# Kidney Disease Prediction
 if selected == "Kidney Disease Prediction":
     st.title("Kidney Disease Prediction using ML")
     age = st.number_input('Age', min_value=0, step=1)
@@ -61,11 +62,11 @@ if selected == "Kidney Disease Prediction":
     pc = st.selectbox('Pus Cell', ['Normal', 'Abnormal'])
     pcc = st.selectbox('Pus Cell Clumps', ['Present', 'Not Present'])
     ba = st.selectbox('Bacteria', ['Present', 'Not Present'])
-    bgr = st.selectbox('Blood Grouping Reagents',min_value=0)
-    bu = st.selectbox('Bethesda Unit', min_value=0)
-    sc = st.number_input('Subcutaneous', min_value=0.0, step=0.1)
-    sod = st.number_input('Superoxide dismutase', min_value=0)
-    pot = st.number_input('Postural Orthostatic Tachycardia', min_value=0.0, step=0.1)
+    bgr = st.number_input('Blood Glucose Random', min_value=0)
+    bu = st.number_input('Blood Urea', min_value=0)
+    sc = st.number_input('Serum Creatinine', min_value=0.0, step=0.1)
+    sod = st.number_input('Sodium', min_value=0)
+    pot = st.number_input('Potassium', min_value=0.0, step=0.1)
     hemo = st.number_input('Hemoglobin', min_value=0.0, step=0.1)
     pcv = st.number_input('Packed Cell Volume', min_value=0)
     wc = st.number_input('White Blood Cell Count', min_value=0)
@@ -91,6 +92,7 @@ if selected == "Kidney Disease Prediction":
                 st.success("The person does not have kidney disease.")
         else:
             st.error("Kidney Disease Prediction model is not available.")
+
 if selected == 'Diabetes Prediction':
     st.title('Diabetes Prediction using ML')
     Pregnancies = st.number_input('Pregnancies', min_value=0, step=1)
