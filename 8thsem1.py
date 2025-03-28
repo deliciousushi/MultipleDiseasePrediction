@@ -101,17 +101,18 @@ if selected == 'Diabetes Prediction':
     BMI = st.number_input('BMI (kg/m²)', min_value=0.0, step=0.1)
     DiabetesPedigreeFunction = st.number_input('Diabetes Pedigree Function', min_value=0.0, step=0.01)
     Age = st.number_input('Age', min_value=0, step=1)
-    
-   if st.button('Diabetes Test Result'):
+
+    if st.button('Diabetes Test Result'):  # Fixed indentation
         user_input = np.array([Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]).reshape(1, -1)
         diab_prediction = diabetes_model.predict(user_input)
         confidence = diabetes_model.predict_proba(user_input)[0][1] * 100
-        
+
         if diab_prediction[0] == 1:
             st.error(f'The person is diabetic (Confidence: {confidence:.2f}%)')
             show_doctor_booking("Diabetes")
         else:
             st.success(f'The person is not diabetic (Confidence: {100-confidence:.2f}%)')
+
 
 if selected == 'Heart Disease Prediction':
     st.title('Heart Disease Prediction using ML')
