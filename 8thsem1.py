@@ -61,6 +61,12 @@ if selected == "Kidney Disease Prediction":
     pc = st.selectbox('Pus Cell', ['Normal', 'Abnormal'])
     pcc = st.selectbox('Pus Cell Clumps', ['Present', 'Not Present'])
     ba = st.selectbox('Bacteria', ['Present', 'Not Present'])
+    bgr = st.selectbox('Blood Grouping Reagents',min_value=0)
+    bu = st.selectbox('Bethesda Unit', min_value=0)
+    sc = st.number_input('Subcutaneous', min_value=0.0, step=0.1)
+    sod = st.number_input('Superoxide dismutase', min_value=0)
+    pot = st.number_input('Postural Orthostatic Tachycardia', min_value=0.0, step=0.1)
+    hemo = st.number_input('Hemoglobin', min_value=0.0, step=0.1)
     pcv = st.number_input('Packed Cell Volume', min_value=0)
     wc = st.number_input('White Blood Cell Count', min_value=0)
     rc = st.number_input('Red Blood Cell Count', min_value=0.0, step=0.1)
@@ -93,16 +99,20 @@ if selected == 'Diabetes Prediction':
     DiabetesPedigreeFunction = st.number_input('Diabetes Pedigree Function', min_value=0.0, step=0.01)
     Age = st.number_input('Age', min_value=0, step=1)
     
-    if st.button('Diabetes Test Result'):
-        user_input = np.array([Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]).reshape(1, -1)
-        diab_prediction = diabetes_model.predict(user_input)
-        confidence = diabetes_model.predict_proba(user_input)[0][1] * 100
-        
-        if diab_prediction[0] == 1:
-            st.error(f'The person is diabetic (Confidence: {confidence:.2f}%)')
-            show_doctor_booking("Diabetes")
+   if st.button("Kidney Disease Test Result"):
+        if kidney_disease_model:
+            user_input = [age, bp, sg, al, su, 1 if rbc == 'Abnormal' else 0, 1 if pc == 'Abnormal' else 0,
+                          1 if pcc == 'Present' else 0, 1 if ba == 'Present' else 0, bgr, bu, sc, sod, pot, hemo, pcv, wc, rc,
+                          1 if htn == 'Yes' else 0, 1 if dm == 'Yes' else 0, 1 if cad == 'Yes' else 0,
+                          1 if appet == 'Poor' else 0, 1 if pe == 'Yes' else 0, 1 if ane == 'Yes' else 0]
+            prediction = kidney_disease_model.predict([user_input])[0]
+            if prediction == 1:
+                st.error("The person has kidney disease.")
+                show_doctor_booking("Nephrologist")
+            else:
+                st.success("The person does not have kidney disease.")
         else:
-            st.success(f'The person is not diabetic (Confidence: {100-confidence:.2f}%)')
+            st.error("Kidney Disease Prediction model is not available.")
 
 if selected == 'Heart Disease Prediction':
     st.title('Heart Disease Prediction using ML')
