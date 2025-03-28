@@ -1,4 +1,4 @@
-pip install tensorflow
+
 import os
 import pickle
 import numpy as np
