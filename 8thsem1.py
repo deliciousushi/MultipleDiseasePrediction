@@ -78,16 +78,19 @@ if selected == "Kidney Disease Prediction":
     ane = st.selectbox('Anemia', ['Yes', 'No'])
     
     if st.button("Kidney Disease Test Result"):
-        user_input = [age, bp, sg, al, su, 1 if rbc == 'Abnormal' else 0, 1 if pc == 'Abnormal' else 0,
-                      1 if pcc == 'Present' else 0, 1 if ba == 'Present' else 0, pcv, wc, rc,
-                      1 if htn == 'Yes' else 0, 1 if dm == 'Yes' else 0, 1 if cad == 'Yes' else 0,
-                      1 if appet == 'Poor' else 0, 1 if pe == 'Yes' else 0, 1 if ane == 'Yes' else 0]
-        prediction = kidney_disease_model.predict([user_input])[0]
-        if prediction == 1:
-            st.error("The person has kidney disease.")
-            show_doctor_booking("Nephrologist")
+        if kidney_disease_model:
+            user_input = [age, bp, sg, al, su, 1 if rbc == 'Abnormal' else 0, 1 if pc == 'Abnormal' else 0,
+                          1 if pcc == 'Present' else 0, 1 if ba == 'Present' else 0, bgr, bu, sc, sod, pot, hemo, pcv, wc, rc,
+                          1 if htn == 'Yes' else 0, 1 if dm == 'Yes' else 0, 1 if cad == 'Yes' else 0,
+                          1 if appet == 'Poor' else 0, 1 if pe == 'Yes' else 0, 1 if ane == 'Yes' else 0]
+            prediction = kidney_disease_model.predict([user_input])[0]
+            if prediction == 1:
+                st.error("The person has kidney disease.")
+                show_doctor_booking("Nephrologist")
+            else:
+                st.success("The person does not have kidney disease.")
         else:
-            st.success("The person does not have kidney disease.")
+            st.error("Kidney Disease Prediction model is not available.")
 if selected == 'Diabetes Prediction':
     st.title('Diabetes Prediction using ML')
     Pregnancies = st.number_input('Pregnancies', min_value=0, step=1)
