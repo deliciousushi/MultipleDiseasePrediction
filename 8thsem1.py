@@ -18,7 +18,8 @@ working_dir = os.path.dirname(os.path.abspath(__file__))
 diabetes_model = pickle.load(open(f'{working_dir}/diabetes_model.sav', 'rb'))
 heart_disease_model = pickle.load(open(f'{working_dir}/heart_disease_model.sav', 'rb'))
 parkinsons_model = pickle.load(open(f'{working_dir}/parkinsons_model.sav', 'rb'))
-kidney_model = keras.models.load_model("kidney_model.sav")
+with open("kidney_model.sav", "rb") as f:
+    kidney_model = pickle.load(f)
 
 # Load doctor data
 doctor_file = f'{working_dir}/doctors_list.csv'
