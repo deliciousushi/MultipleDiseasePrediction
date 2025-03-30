@@ -49,6 +49,8 @@ def show_doctor_booking(specialty):
     else:
         st.warning("No available doctors for this specialty.")
 
+import numpy as np
+
 # Kidney Disease Prediction
 if selected == "Kidney Disease Prediction":
     st.title("Kidney Disease Prediction using ML")
@@ -79,11 +81,11 @@ if selected == "Kidney Disease Prediction":
     
     if st.button("Kidney Disease Test Result"):
         if kidney_model:
-            user_input = [age, bp, sg, al, su, 1 if rbc == 'Abnormal' else 0, 1 if pc == 'Abnormal' else 0,
+            user_input = np.array([[age, bp, sg, al, su, 1 if rbc == 'Abnormal' else 0, 1 if pc == 'Abnormal' else 0,
                           1 if pcc == 'Present' else 0, 1 if ba == 'Present' else 0, bgr, bu, sc, sod, pot, hemo, pcv, wc, rc,
                           1 if htn == 'Yes' else 0, 1 if dm == 'Yes' else 0, 1 if cad == 'Yes' else 0,
-                          1 if appet == 'Poor' else 0, 1 if pe == 'Yes' else 0, 1 if ane == 'Yes' else 0]
-            prediction = kidney_model.predict([user_input])[0]
+                          1 if appet == 'Poor' else 0, 1 if pe == 'Yes' else 0, 1 if ane == 'Yes' else 0]])
+            prediction = kidney_model.predict(user_input)[0]
             if prediction == 1:
                 st.error("The person has kidney disease.")
                 show_doctor_booking("Nephrologist")
@@ -91,6 +93,7 @@ if selected == "Kidney Disease Prediction":
                 st.success("The person does not have kidney disease.")
         else:
             st.error("Kidney Disease Prediction model is not available.")
+
 
 if selected == 'Diabetes Prediction':
     st.title('Diabetes Prediction using ML')
