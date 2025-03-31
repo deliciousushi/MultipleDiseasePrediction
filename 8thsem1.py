@@ -53,7 +53,7 @@ import numpy as np
 
 # Kidney Disease Prediction
 if selected == "Kidney Disease Prediction":
-   st.title("Kidney Disease Prediction using ML")
+    st.title("Kidney Disease Prediction using ML")
     age = st.number_input('Age (years)', min_value=0, step=1)
     bp = st.number_input('Blood Pressure (mm Hg)', min_value=0)
     sg = st.number_input('Specific Gravity', min_value=1.000, max_value=1.030, step=0.001, format="%.3f")
