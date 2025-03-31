@@ -22,7 +22,7 @@ with open("kidney_model (2).sav", "rb") as f:
         kidney_model = pickle.load(f)
 
 # Load doctor data
-doctor_file = f'{working_dir}/doctors_list.csv'
+doctor_file = f'{working_dir}/doctors_list (1).csv'
 if os.path.exists(doctor_file):
     doctor_data = pd.read_csv(doctor_file)
 else:
