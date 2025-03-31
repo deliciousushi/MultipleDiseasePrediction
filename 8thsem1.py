@@ -37,6 +37,20 @@ with st.sidebar:
                            icons=['activity', 'heart', 'person', 'droplet'],
                            default_index=0)
 
+# Helper function to convert 12-hour time (with am/pm) to 24-hour format
+def convert_to_24hr(time_str):
+    time_parts = time_str.strip()
+    if 'am' in time_parts:
+        hour = int(time_parts.split('am')[0])
+        if hour == 12:  # Handle 12am case
+            return 0
+        return hour
+    elif 'pm' in time_parts:
+        hour = int(time_parts.split('pm')[0])
+        if hour != 12:  # Handle 12pm case
+            return hour + 12
+    return 0  # Default case, should not reach here
+
 # Function to display doctor booking option
 def show_doctor_booking(specialty):
     st.subheader("Book an Appointment")
@@ -55,14 +69,14 @@ def show_doctor_booking(specialty):
             days = availability[0].split('-')
             hours = availability[1].split('-')
             
-            # Assuming availability is always in a format like "Mon-Fri 9am-5pm"
-            start_hour = int(hours[0].split('am')[0] if 'am' in hours[0] else hours[0].split('pm')[0])
-            end_hour = int(hours[1].split('am')[0] if 'am' in hours[1] else hours[1].split('pm')[0])
+            # Convert availability hours to 24-hour format
+            start_hour = convert_to_24hr(hours[0])
+            end_hour = convert_to_24hr(hours[1])
             
             # Date picker for appointment date
             appointment_date = st.date_input(f"Choose a date for your appointment with {row['Doctor Name']}", min_value=datetime.today())
             
-            # Time picker for appointment time
+            # Generate available times based on the doctor's availability
             available_times = [f"{hour}:00" for hour in range(start_hour, end_hour)]
             appointment_time = st.selectbox(f"Choose a time for your appointment with {row['Doctor Name']}", available_times)
             
@@ -71,7 +85,6 @@ def show_doctor_booking(specialty):
                 st.success(f"You have successfully booked an appointment with {row['Doctor Name']} on {appointment_date} at {appointment_time}!")
     else:
         st.warning("No available doctors for this specialty.")
-
 
 import numpy as np
 
