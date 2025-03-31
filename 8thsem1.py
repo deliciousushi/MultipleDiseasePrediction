@@ -39,15 +39,38 @@ with st.sidebar:
 # Function to display doctor booking option
 def show_doctor_booking(specialty):
     st.subheader("Book an Appointment")
+    
+    # Filter available doctors based on selected specialty
     available_doctors = doctor_data[doctor_data['Specialty'] == specialty]
+    
     if not available_doctors.empty:
         for _, row in available_doctors.iterrows():
             st.write(f"**{row['Doctor Name']}** - {row['Location']}")
             st.write(f"📞 Contact: {row['Contact']}")
             st.write(f"🕒 Availability: {row['Availability']}")
-            st.button(f"Book Appointment with {row['Doctor Name']}")
+            
+            # Parse the availability range
+            availability = row['Availability'].split(' ')
+            days = availability[0].split('-')
+            hours = availability[1].split('-')
+            
+            # Assuming availability is always in a format like "Mon-Fri 9am-5pm"
+            start_hour = int(hours[0].split('am')[0] if 'am' in hours[0] else hours[0].split('pm')[0])
+            end_hour = int(hours[1].split('am')[0] if 'am' in hours[1] else hours[1].split('pm')[0])
+            
+            # Date picker for appointment date
+            appointment_date = st.date_input(f"Choose a date for your appointment with {row['Doctor Name']}", min_value=datetime.today())
+            
+            # Time picker for appointment time
+            available_times = [f"{hour}:00" for hour in range(start_hour, end_hour)]
+            appointment_time = st.selectbox(f"Choose a time for your appointment with {row['Doctor Name']}", available_times)
+            
+            # Button to book an appointment
+            if st.button(f"Book Appointment with {row['Doctor Name']}"):
+                st.success(f"You have successfully booked an appointment with {row['Doctor Name']} on {appointment_date} at {appointment_time}!")
     else:
         st.warning("No available doctors for this specialty.")
+
 
 import numpy as np
 
