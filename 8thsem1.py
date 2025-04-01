@@ -59,7 +59,6 @@ def extract_time_range(availability_str):
 # Function to store booking confirmation
 def confirm_booking(doctor_name, date, time):
     st.session_state["appointment"] = f"✅ Appointment confirmed with {doctor_name} on {date} at {time}."
-
 # Function to display doctor booking
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
@@ -72,7 +71,8 @@ def show_doctor_booking(specialty, doctor_data):
         return
 
     # Iterate through available doctors and display booking options
-    for _, row in available_doctors.iterrows():
+    for index, row in available_doctors.iterrows():  # Added index to make form key unique
+        doctor_key = f"{row['Doctor Name']}_{index}"  # Ensure unique form key
         st.write(f"**{row['Doctor Name']}** - {row['Location']}")
         st.write(f"📞 Contact: {row['Contact']}")
 
@@ -83,10 +83,18 @@ def show_doctor_booking(specialty, doctor_data):
             continue
 
         # Create a form to select appointment date and time
-        with st.form(f"booking_form_{row['Doctor Name']}"):
-            appointment_date = st.date_input(f"Select a date for {row['Doctor Name']}", min_value=datetime.today().date())
+        with st.form(f"booking_form_{doctor_key}"):  # Using unique key
+            appointment_date = st.date_input(
+                f"Select a date for {row['Doctor Name']}",
+                min_value=datetime.today().date(),
+                key=f"date_{doctor_key}"  # Unique key for input field
+            )
             available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
-            appointment_time = st.selectbox(f"Choose a time for {row['Doctor Name']}", available_times)
+            appointment_time = st.selectbox(
+                f"Choose a time for {row['Doctor Name']}",
+                available_times,
+                key=f"time_{doctor_key}"  # Unique key for selectbox
+            )
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
@@ -100,20 +108,12 @@ def show_doctor_booking(specialty, doctor_data):
                 st.success(f"Appointment confirmed with {row['Doctor Name']} on {appointment_date} at {appointment_time}")
 
                 # Store query parameters for redirection
-                st.session_state["doctor_for_patient_details"] = row['Doctor Name']
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
                 st.success(f"Redirecting to enter patient details for {row['Doctor Name']}...")
 
-    # Show the confirmation message outside the loop
+    # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
-
-# Trigger doctor booking based on the selected specialty
-if selected == "Kidney Disease Prediction":
-    # Display doctor booking for nephrologist if kidney disease prediction is selected
-    show_doctor_booking("Nephrologist", doctor_data)
-
-
 
 import numpy as np
 
