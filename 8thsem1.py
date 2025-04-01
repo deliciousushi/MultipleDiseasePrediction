@@ -35,6 +35,7 @@ with st.sidebar:
                            icons=['activity', 'heart', 'person', 'droplet'],
                            default_index=0)
 
+
 # Convert 12-hour time format to 24-hour integer
 def convert_to_24hr(time_str):
     time_str = time_str.strip().lower()
@@ -46,19 +47,30 @@ def convert_to_24hr(time_str):
         return hour if hour == 12 else hour + 12
     return None
 
-# Extract start and end time from availability
-def extract_time_range(availability_str):
+# Extract available days and time range
+def extract_availability(availability_str):
     try:
-        start_time, end_time = availability_str.split("-")
-        return convert_to_24hr(start_time), convert_to_24hr(end_time)
-    except ValueError:
-        return None, None
+        parts = availability_str.rsplit(" ", 1)  # Split days and time
+        days, time_range = parts[0], parts[1]
+        start_time, end_time = time_range.split("-")
+
+        available_days = days.split(",")  # Example: "Monday-Friday" → ["Monday", "Friday"]
+        start_hour, end_hour = convert_to_24hr(start_time), convert_to_24hr(end_time)
+
+        return available_days, start_hour, end_hour
+    except (ValueError, IndexError):
+        return None, None, None
+
+# Check if selected date is within available days
+def is_available_on_day(selected_date, available_days):
+    selected_day = selected_date.strftime("%A")  # Convert date to weekday name
+    return any(selected_day in day for day in available_days)
 
 # Store booking confirmation
 def confirm_booking(doctor_name, date, time):
     st.session_state["appointment"] = f"✅ Appointment confirmed with {doctor_name} on {date} at {time}."
 
-# Function to display doctor booking
+# Show doctor booking with day validation
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -69,24 +81,29 @@ def show_doctor_booking(specialty, doctor_data):
         st.warning("No available doctors for this specialty.")
         return
 
-    # Iterate through available doctors
     for index, row in available_doctors.iterrows():
         doctor_key = f"{row['Doctor Name'].replace(' ', '_')}_{index}"  # Unique key
         st.write(f"**{row['Doctor Name']}** - {row['Location']}")
         st.write(f"📞 Contact: {row['Contact']}")
 
-        # Extract availability hours
-        start_hour, end_hour = extract_time_range(row['Availability'])
-        if start_hour is None or end_hour is None:
+        # Extract days and availability hours
+        available_days, start_hour, end_hour = extract_availability(row['Availability'])
+        if available_days is None or start_hour is None or end_hour is None:
             st.error(f"Invalid availability format for {row['Doctor Name']}.")
             continue
 
         with st.form(f"booking_form_{doctor_key}"):
             appointment_date = st.date_input(
                 f"Select a date for {row['Doctor Name']}",
-                min_value=datetime.today().date(),
+                min_value=datetime.datetime.today().date(),
                 key=f"date_{doctor_key}"
             )
+
+            # Validate if doctor is available on selected day
+            if not is_available_on_day(appointment_date, available_days):
+                st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}.")
+                continue
+
             available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
             appointment_time = st.selectbox(
                 f"Choose a time for {row['Doctor Name']}",
@@ -97,14 +114,12 @@ def show_doctor_booking(specialty, doctor_data):
 
             if submitted:
                 confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
-
-                # ✅ Redirect and force rerun
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
                 st.rerun()
 
-    # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
+
 
 
 import numpy as np
