@@ -2,7 +2,7 @@ import streamlit as st
 import time  # For adding delay after submission
 
 # Get doctor name from URL parameters
-query_params = st.query_params
+query_params = st.experimental_set_query_params()
 doctor_name = query_params.get("doctor", "")
 
 st.title("Enter Patient Details")
