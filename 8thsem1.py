@@ -49,6 +49,22 @@ def convert_to_24hr(time_str):
     else:
         raise ValueError(f"Invalid time format: {time_str}")  # Handle incorrect formats
 
+# Function to extract time range from "Days TimeRange" format
+def extract_time_range(availability_str):
+    parts = availability_str.split(" ")
+    
+    # Time range should be the last part
+    if len(parts) < 2:
+        raise ValueError(f"Invalid availability format: {availability_str}")
+
+    time_range = parts[-1]  # Last part should be "9am-5pm"
+    
+    try:
+        start_time, end_time = time_range.split("-")
+        return convert_to_24hr(start_time), convert_to_24hr(end_time)
+    except ValueError as e:
+        raise ValueError(f"Error parsing time range in {availability_str}: {e}")
+
 # Function to display doctor booking option
 def show_doctor_booking(specialty):
     st.subheader("Book an Appointment")
@@ -65,9 +81,8 @@ def show_doctor_booking(specialty):
         
         # Ensure availability format is correct
         try:
-            hours = row['Availability'].split('-')
-            start_hour, end_hour = convert_to_24hr(hours[0]), convert_to_24hr(hours[1])
-        except (ValueError, IndexError) as e:
+            start_hour, end_hour = extract_time_range(row['Availability'])
+        except ValueError as e:
             st.error(f"Error parsing availability for {row['Doctor Name']}: {e}")
             continue  # Skip this doctor if availability is incorrect
 
@@ -86,10 +101,6 @@ def show_doctor_booking(specialty):
         # Booking button
         if st.button(f"Book Appointment with {row['Doctor Name']}"):
             st.success(f"Appointment confirmed with {row['Doctor Name']} on {appointment_date} at {appointment_time}.")
-
-
-
-
 
 import numpy as np
 
