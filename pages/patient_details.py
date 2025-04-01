@@ -3,6 +3,7 @@ import streamlit as st
 # Get doctor name from URL parameters
 query_params = st.experimental_get_query_params()
 doctor_name = query_params.get("doctor", [""])[0]
+st.write(f"Entering details for {doctor_name}")
 
 st.title("Enter Patient Details")
 
