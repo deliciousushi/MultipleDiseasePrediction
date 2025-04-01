@@ -84,8 +84,8 @@ def show_doctor_booking(specialty, doctor_data):
 
         # Create a form to select appointment date and time
         with st.form(f"booking_form_{row['Doctor Name']}"):
-            appointment_date = st.date_input(
-                f"Select a date for {row['Doctor Name']}", min_value=datetime.datetime.today().date())
+           appointment_date = st.date_input(f"Select a date for {row['Doctor Name']}", min_value=datetime.datetime.today().date())
+
             available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
             appointment_time = st.selectbox(
                 f"Choose a time for {row['Doctor Name']}", available_times)
