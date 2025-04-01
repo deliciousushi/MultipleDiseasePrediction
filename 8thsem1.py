@@ -70,7 +70,8 @@ def is_available_on_day(selected_date, available_days):
 def confirm_booking(doctor_name, date, time):
     st.session_state["appointment"] = f"✅ Appointment confirmed with {doctor_name} on {date} at {time}."
 
-# Show doctor booking with day validation
+
+# Function to display doctor booking
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -110,6 +111,7 @@ def show_doctor_booking(specialty, doctor_data):
                 available_times,
                 key=f"time_{doctor_key}"
             )
+            # Add the submit button here inside the form block
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
@@ -117,10 +119,9 @@ def show_doctor_booking(specialty, doctor_data):
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
                 st.rerun()
 
+    # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
-
-
 
 import numpy as np
 
