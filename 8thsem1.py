@@ -1,4 +1,3 @@
-
 import os
 import pickle
 import numpy as np
@@ -7,7 +6,6 @@ from datetime import datetime
 import streamlit as st
 from streamlit_option_menu import option_menu
 from tensorflow import keras
-
 
 # Set page configuration
 st.set_page_config(page_title="Health Assistant", layout="wide", page_icon="🧑‍⚕️")
@@ -35,7 +33,9 @@ with st.sidebar:
                            ['Diabetes Prediction', 'Heart Disease Prediction', "Parkinson's Prediction", "Kidney Disease Prediction"],
                            menu_icon='hospital-fill',
                            icons=['activity', 'heart', 'person', 'droplet'],
-                           default_index=0)
+                           default_index=0)import streamlit as st
+import datetime
+
 # Convert 12-hour time format to 24-hour integer
 def convert_to_24hr(time_str):
     time_str = time_str.strip().lower()
@@ -50,7 +50,7 @@ def convert_to_24hr(time_str):
 # Extract start and end time from availability
 def extract_time_range(availability_str):
     parts = availability_str.split(" ")
-    time_range = parts[-1]  # Extract last part (e.g., "9am-5pm")
+    time_range = parts[-1]  # Extract the last part (e.g., "9am-5pm")
     try:
         start_time, end_time = time_range.split("-")
         return convert_to_24hr(start_time), convert_to_24hr(end_time)
@@ -65,25 +65,31 @@ def confirm_booking(doctor_name, date, time):
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
+    # Filter available doctors based on the specialty
     available_doctors = doctor_data[doctor_data['Specialty'] == specialty]
 
     if available_doctors.empty:
         st.warning("No available doctors for this specialty.")
         return
 
+    # Iterate through available doctors and display booking options
     for _, row in available_doctors.iterrows():
         st.write(f"**{row['Doctor Name']}** - {row['Location']}")
         st.write(f"📞 Contact: {row['Contact']}")
 
+        # Extract the start and end time from the doctor's availability
         start_hour, end_hour = extract_time_range(row['Availability'])
         if start_hour is None or end_hour is None:
             st.error(f"Invalid availability format for {row['Doctor Name']}.")
             continue
-        
+
+        # Create a form to select appointment date and time
         with st.form(f"booking_form_{row['Doctor Name']}"):
-            appointment_date = st.date_input(f"Select a date for {row['Doctor Name']}", min_value=datetime.today().date())
+            appointment_date = st.date_input(
+                f"Select a date for {row['Doctor Name']}", min_value=datetime.datetime.today().date())
             available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
-            appointment_time = st.selectbox(f"Choose a time for {row['Doctor Name']}", available_times)
+            appointment_time = st.selectbox(
+                f"Choose a time for {row['Doctor Name']}", available_times)
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
@@ -96,13 +102,15 @@ def show_doctor_booking(specialty, doctor_data):
                 # Show confirmation message
                 st.success(f"Appointment confirmed with {row['Doctor Name']} on {appointment_date} at {appointment_time}")
 
-                # Redirect to patient details page with doctor name as query parameter
+                # Redirect to the patient details page with doctor name as a query parameter
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
                 st.success(f"Redirecting to enter patient details for {row['Doctor Name']}...")
 
-    # Show confirmation message outside the loop
+    # Show the confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
+
+
 import numpy as np
 
 # Kidney Disease Prediction
