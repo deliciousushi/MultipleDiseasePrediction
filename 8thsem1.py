@@ -95,7 +95,7 @@ def show_doctor_booking(specialty, doctor_data):
         with st.form(f"booking_form_{doctor_key}"):
             appointment_date = st.date_input(
                 f"Select a date for {row['Doctor Name']}",
-                min_value=datetime.datetime.today().date(),
+                min_value=datetime.today().date(),
                 key=f"date_{doctor_key}"
             )
 
