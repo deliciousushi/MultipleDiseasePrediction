@@ -1,14 +1,14 @@
 import streamlit as st
+import time  # For adding delay after submission
 
 # Get doctor name from URL parameters
-query_params = st.experimental_get_query_params()
-doctor_name = query_params.get("doctor", [""])[0]
-st.write(f"Entering details for {doctor_name}")
+query_params = st.query_params
+doctor_name = query_params.get("doctor", "")
 
 st.title("Enter Patient Details")
 
 if doctor_name:
-    st.subheader(f"Appointment with {doctor_name}")
+    st.subheader(f"Appointment with Dr. {doctor_name}")
 
     # Patient details form
     with st.form("patient_details_form"):
@@ -21,6 +21,16 @@ if doctor_name:
         submitted = st.form_submit_button("Confirm Appointment")
 
         if submitted:
-            st.success(f"✅ Appointment confirmed for {name} with {doctor_name}.")
+            if name and contact:
+                st.success(f"✅ Appointment confirmed for {name} with Dr. {doctor_name}.")
+                
+                # Simulate processing time
+                time.sleep(2)
+
+                # Redirect (optional: change the URL for further actions)
+                st.query_params.clear()
+                st.rerun()
+            else:
+                st.error("⚠️ Please fill in all required fields.")
 else:
-    st.warning("No doctor selected. Please go back and book an appointment.")
+    st.warning("⚠️ No doctor selected. Please go back and book an appointment.")
