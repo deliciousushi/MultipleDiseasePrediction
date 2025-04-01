@@ -37,15 +37,17 @@ with st.sidebar:
                            icons=['activity', 'heart', 'person', 'droplet'],
                            default_index=0)
 
-# Helper function to convert 12-hour time (with am/pm) to 24-hour format
+# Convert 12-hour time format to 24-hour integer
 def convert_to_24hr(time_str):
+    time_str = time_str.strip().lower()  # Normalize input
     if "am" in time_str:
         hour = int(time_str.replace("am", "").strip())
-        return 0 if hour == 12 else hour  # 12 AM should be 0
+        return 0 if hour == 12 else hour
     elif "pm" in time_str:
         hour = int(time_str.replace("pm", "").strip())
-        return hour if hour == 12 else hour + 12  # 12 PM should stay 12
-    return None
+        return hour if hour == 12 else hour + 12
+    else:
+        raise ValueError(f"Invalid time format: {time_str}")  # Handle incorrect formats
 
 # Function to display doctor booking option
 def show_doctor_booking(specialty):
@@ -61,20 +63,32 @@ def show_doctor_booking(specialty):
         st.write(f"**{row['Doctor Name']}** - {row['Location']}")
         st.write(f"📞 Contact: {row['Contact']}")
         
-        # Extract availability time range
-        hours = row['Availability'].split('-')
-        start_hour, end_hour = convert_to_24hr(hours[0]), convert_to_24hr(hours[1])
+        # Ensure availability format is correct
+        try:
+            hours = row['Availability'].split('-')
+            start_hour, end_hour = convert_to_24hr(hours[0]), convert_to_24hr(hours[1])
+        except (ValueError, IndexError) as e:
+            st.error(f"Error parsing availability for {row['Doctor Name']}: {e}")
+            continue  # Skip this doctor if availability is incorrect
 
         # Date picker
         appointment_date = st.date_input(f"Select a date for {row['Doctor Name']}", min_value=datetime.today().date())
 
-        # Generate available time slots
-        available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
+        # Generate available time slots safely
+        if isinstance(start_hour, int) and isinstance(end_hour, int) and start_hour < end_hour:
+            available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
+        else:
+            st.error(f"Invalid time range for {row['Doctor Name']}: {row['Availability']}")
+            continue
+
         appointment_time = st.selectbox(f"Choose a time for {row['Doctor Name']}", available_times)
 
         # Booking button
         if st.button(f"Book Appointment with {row['Doctor Name']}"):
             st.success(f"Appointment confirmed with {row['Doctor Name']} on {appointment_date} at {appointment_time}.")
+
+
+
 
 
 import numpy as np
