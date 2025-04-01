@@ -137,7 +137,7 @@ def show_doctor_booking(specialty, doctor_data):
                         "time": appointment_time
                     }
                     # Redirect to patient details page using query parameters
-                    st.experimental_set_query_params(page="patient_details")
+                    st.experimental_set_query_params(page="pages/patient_details")
                     st.rerun()
                 else:
                     st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}.")
