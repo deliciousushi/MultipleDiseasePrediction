@@ -133,17 +133,36 @@ def show_doctor_booking(specialty, doctor_data):
                 if is_valid_date and appointment_time:
                     st.session_state["appointment_details"] = {
                         "doctor": row["Doctor Name"],
+                        "location": row["Location"],
+                        "contact": row["Contact"],
                         "date": appointment_date.strftime("%Y-%m-%d"),
                         "time": appointment_time
                     }
-                    # Redirect to patient details page using query parameters
-                    st.experimental_set_query_params(page="pages/patient_details")
                     st.rerun()
                 else:
                     st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}.")
 
+    # **Show Patient Details Form after Booking**
     if "appointment_details" in st.session_state:
         st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']} at {st.session_state['appointment_details']['time']}.")
+        
+        with st.form("patient_details_form"):
+            st.subheader("Enter Patient Details")
+            patient_name = st.text_input("Full Name", key="patient_name")
+            patient_age = st.number_input("Age", min_value=0, step=1, key="patient_age")
+            patient_contact = st.text_input("Contact Number", key="patient_contact")
+            symptoms = st.text_area("Describe your symptoms", key="symptoms")
+
+            submit_patient_details = st.form_submit_button("Confirm Appointment")
+
+            if submit_patient_details:
+                st.session_state["final_confirmation"] = {
+                    "name": patient_name,
+                    "age": patient_age,
+                    "contact": patient_contact,
+                    "symptoms": symptoms
+                }
+                st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
 
 
 import numpy as np
