@@ -62,7 +62,7 @@ def confirm_booking(doctor_name, date, time):
     st.session_state["appointment"] = f"✅ Appointment confirmed with {doctor_name} on {date} at {time}."
 
 # Function to display doctor booking
-def show_doctor_booking(specialty):
+def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
     available_doctors = doctor_data[doctor_data['Specialty'] == specialty]
@@ -87,11 +87,20 @@ def show_doctor_booking(specialty):
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
+                # Store appointment details in session state
+                st.session_state["doctor_name"] = row['Doctor Name']
+                st.session_state["appointment_date"] = appointment_date
+                st.session_state["appointment_time"] = appointment_time
                 confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
+
+                # Redirect to patient details page with doctor name as query parameter
+                st.experimental_set_query_params(doctor=row['Doctor Name'])
+                st.success(f"Redirecting to enter patient details for {row['Doctor Name']}...")
 
     # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
+
 import numpy as np
 
 # Kidney Disease Prediction
@@ -131,7 +140,7 @@ if selected == "Kidney Disease Prediction":
             prediction = kidney_model.predict(user_input)[0]
             if prediction == 1:
                 st.error("The person has kidney disease.")
-                show_doctor_booking("Nephrologist")
+                show_doctor_booking("Nephrologist",doctor_data)
             else:
                 st.success("The person does not have kidney disease.")
         else:
@@ -156,7 +165,7 @@ if selected == 'Diabetes Prediction':
 
         if diab_prediction[0] == 1:
             st.error(f'The person is diabetic (Confidence: {confidence:.2f}%)')
-            show_doctor_booking("Diabetes")
+            show_doctor_booking("Diabetes",doctor_data)
         else:
             st.success(f'The person is not diabetic (Confidence: {100-confidence:.2f}%)')
 
@@ -192,7 +201,7 @@ if selected == 'Heart Disease Prediction':
         
         if heart_prediction[0] == 1:
             st.error(f'The person has heart disease (Confidence: {confidence:.2f}%)')
-            show_doctor_booking("Cardiology")
+            show_doctor_booking("Cardiology",doctor_data)
         else:
             st.success(f'The person does not have heart disease (Confidence: {100-confidence:.2f}%)')
 
@@ -207,6 +216,6 @@ if selected == "Parkinsons Prediction":
         
         if parkinsons_prediction[0] == 1:
             st.error(f"The person has Parkinson's disease (Confidence: {confidence:.2f}%)")
-            show_doctor_booking("Neurology")
+            show_doctor_booking("Neurology",doctor_data)
         else:
             st.success(f"The person does not have Parkinson's disease (Confidence: {100-confidence:.2f}%)")
