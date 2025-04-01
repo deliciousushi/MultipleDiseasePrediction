@@ -47,7 +47,7 @@ def convert_to_24hr(time_str):
         return hour if hour == 12 else hour + 12
     return None
 
-# Extracts start and end time from availability
+# Extract start and end time from availability
 def extract_time_range(availability_str):
     parts = availability_str.split(" ")
     time_range = parts[-1]  # Extract last part (e.g., "9am-5pm")
@@ -56,6 +56,10 @@ def extract_time_range(availability_str):
         return convert_to_24hr(start_time), convert_to_24hr(end_time)
     except ValueError:
         return None, None
+
+# Function to store booking confirmation
+def confirm_booking(doctor_name, date, time):
+    st.session_state["appointment"] = f"✅ Appointment confirmed with {doctor_name} on {date} at {time}."
 
 # Function to display doctor booking
 def show_doctor_booking(specialty):
@@ -70,7 +74,7 @@ def show_doctor_booking(specialty):
     for _, row in available_doctors.iterrows():
         st.write(f"**{row['Doctor Name']}** - {row['Location']}")
         st.write(f"📞 Contact: {row['Contact']}")
-        
+
         start_hour, end_hour = extract_time_range(row['Availability'])
         if start_hour is None or end_hour is None:
             st.error(f"Invalid availability format for {row['Doctor Name']}.")
@@ -83,8 +87,11 @@ def show_doctor_booking(specialty):
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
-                st.success(f"✅ Appointment confirmed with {row['Doctor Name']} on {appointment_date} at {appointment_time}.")
+                confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
 
+    # Show confirmation message outside the loop
+    if "appointment" in st.session_state:
+        st.success(st.session_state["appointment"])
 import numpy as np
 
 # Kidney Disease Prediction
