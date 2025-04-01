@@ -48,44 +48,49 @@ def convert_to_24hr(time_str):
 
 # Extract start and end time from availability
 def extract_time_range(availability_str):
-    parts = availability_str.split(" ")
-    time_range = parts[-1]  # Extract the last part (e.g., "9am-5pm")
     try:
-        start_time, end_time = time_range.split("-")
+        start_time, end_time = availability_str.split("-")
         return convert_to_24hr(start_time), convert_to_24hr(end_time)
     except ValueError:
         return None, None
 
-# Function to confirm and redirect after booking
+# Store booking confirmation
 def confirm_booking(doctor_name, date, time):
     st.session_state["appointment"] = f"✅ Appointment confirmed with {doctor_name} on {date} at {time}."
 
-# Function to show doctor booking
+# Function to display doctor booking
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
-    # Filter available doctors
+    # Filter doctors by specialty
     available_doctors = doctor_data[doctor_data['Specialty'] == specialty]
+
     if available_doctors.empty:
         st.warning("No available doctors for this specialty.")
         return
 
-    # Iterate over doctors
+    # Iterate through available doctors
     for index, row in available_doctors.iterrows():
-        doctor_key = f"{row['Doctor Name']}_{index}"  # Unique key
+        doctor_key = f"{row['Doctor Name'].replace(' ', '_')}_{index}"  # Unique key
         st.write(f"**{row['Doctor Name']}** - {row['Location']}")
         st.write(f"📞 Contact: {row['Contact']}")
 
-        # Create form for each doctor
+        # Extract availability hours
+        start_hour, end_hour = extract_time_range(row['Availability'])
+        if start_hour is None or end_hour is None:
+            st.error(f"Invalid availability format for {row['Doctor Name']}.")
+            continue
+
         with st.form(f"booking_form_{doctor_key}"):
             appointment_date = st.date_input(
                 f"Select a date for {row['Doctor Name']}",
                 min_value=datetime.today().date(),
                 key=f"date_{doctor_key}"
             )
+            available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
             appointment_time = st.selectbox(
                 f"Choose a time for {row['Doctor Name']}",
-                [f"{h}:00" for h in range(9, 17)],  # Example available hours
+                available_times,
                 key=f"time_{doctor_key}"
             )
             submitted = st.form_submit_button("Book Appointment")
@@ -93,15 +98,14 @@ def show_doctor_booking(specialty, doctor_data):
             if submitted:
                 confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
 
-                # ✅ Set query parameters for redirection
+                # ✅ Redirect and force rerun
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
+                st.rerun()
 
-                # ✅ Force Streamlit to rerun
-                st.experimental_rerun()
-
-    # Show confirmation message
+    # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
+
 
 import numpy as np
 
