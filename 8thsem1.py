@@ -82,7 +82,7 @@ def is_available_on_date(appointment_date, available_days, start_hour, end_hour)
 # Store booking confirmation
 def confirm_booking(doctor_name, date, time):
     st.session_state["appointment"] = f"✅ Appointment confirmed with {doctor_name} on {date} at {time}."
-    
+
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -103,11 +103,6 @@ def show_doctor_booking(specialty, doctor_data):
             st.error(f"Invalid availability format for {row['Doctor Name']}.")
             continue
 
-        # Store warning in session state
-        warning_key = f"warning_{doctor_key}"
-        if warning_key not in st.session_state:
-            st.session_state[warning_key] = ""
-
         with st.form(f"booking_form_{doctor_key}"):
             # Date selection
             appointment_date = st.date_input(
@@ -116,7 +111,7 @@ def show_doctor_booking(specialty, doctor_data):
                 key=f"date_{doctor_key}"
             )
 
-            # Check doctor availability for the selected date
+            # Check availability
             is_valid_date = is_available_on_date(
                 datetime.combine(appointment_date, datetime.min.time()),
                 available_days,
@@ -124,9 +119,7 @@ def show_doctor_booking(specialty, doctor_data):
                 end_hour
             )
 
-            # If valid date, show time selection
             if is_valid_date:
-                st.session_state[warning_key] = ""  # Clear warning
                 available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
                 appointment_time = st.selectbox(
                     f"Choose a time for {row['Doctor Name']}",
@@ -134,26 +127,24 @@ def show_doctor_booking(specialty, doctor_data):
                     key=f"time_{doctor_key}"
                 )
             else:
-                appointment_time = None  # Prevent form submission on invalid dates
+                appointment_time = None
 
-            # Submit button inside form
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
                 if is_valid_date and appointment_time:
-                    confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
-                    st.session_state[warning_key] = ""
-                    st.experimental_rerun()
+                    st.session_state["appointment_details"] = {
+                        "doctor": row["Doctor Name"],
+                        "date": appointment_date.strftime("%Y-%m-%d"),
+                        "time": appointment_time
+                    }
+                    st.switch_page("patient_details.py")  # Redirect to patient details page
                 else:
-                    st.session_state[warning_key] = f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}."
+                    st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}.")
 
-        # Display warning outside form (if invalid date)
-        if st.session_state[warning_key]:
-            st.warning(st.session_state[warning_key])
+    if "appointment_details" in st.session_state:
+        st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']} at {st.session_state['appointment_details']['time']}.")
 
-    # Show confirmation message
-    if "appointment" in st.session_state:
-        st.success(st.session_state["appointment"])
 
 import numpy as np
 
