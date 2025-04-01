@@ -145,7 +145,7 @@ def show_doctor_booking(specialty, doctor_data):
     # **Show Patient Details Form after Booking**
     if "appointment_details" in st.session_state:
         st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']} at {st.session_state['appointment_details']['time']}.")
-        
+
         with st.form("patient_details_form"):
             st.subheader("Enter Patient Details")
             patient_name = st.text_input("Full Name", key="patient_name")
@@ -163,6 +163,7 @@ def show_doctor_booking(specialty, doctor_data):
                     "symptoms": symptoms
                 }
                 st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
+
 
 
 import numpy as np
