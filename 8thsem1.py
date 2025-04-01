@@ -18,7 +18,7 @@ diabetes_model = pickle.load(open(f'{working_dir}/diabetes_model.sav', 'rb'))
 heart_disease_model = pickle.load(open(f'{working_dir}/heart_disease_model.sav', 'rb'))
 parkinsons_model = pickle.load(open(f'{working_dir}/parkinsons_model.sav', 'rb'))
 with open("kidney_model (2).sav", "rb") as f:
-        kidney_model = pickle.load(f)
+    kidney_model = pickle.load(f)
 
 # Load doctor data
 doctor_file = f'{working_dir}/doctors_list (1).csv'
@@ -84,10 +84,9 @@ def show_doctor_booking(specialty, doctor_data):
 
         # Create a form to select appointment date and time
         with st.form(f"booking_form_{row['Doctor Name']}"):
-            appointment_date = st.date_input(f"Select a date for {row['Doctor Name']}", min_value=datetime.datetime.today().date())
+            appointment_date = st.date_input(f"Select a date for {row['Doctor Name']}", min_value=datetime.today().date())
             available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
-            appointment_time = st.selectbox(
-                f"Choose a time for {row['Doctor Name']}", available_times)
+            appointment_time = st.selectbox(f"Choose a time for {row['Doctor Name']}", available_times)
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
@@ -100,13 +99,20 @@ def show_doctor_booking(specialty, doctor_data):
                 # Show confirmation message
                 st.success(f"Appointment confirmed with {row['Doctor Name']} on {appointment_date} at {appointment_time}")
 
-                # Redirect to the patient details page with doctor name as a query parameter
+                # Store query parameters for redirection
+                st.session_state["doctor_for_patient_details"] = row['Doctor Name']
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
                 st.success(f"Redirecting to enter patient details for {row['Doctor Name']}...")
 
     # Show the confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
+
+# Trigger doctor booking based on the selected specialty
+if selected == "Kidney Disease Prediction":
+    # Display doctor booking for nephrologist if kidney disease prediction is selected
+    show_doctor_booking("Nephrologist", doctor_data)
+
 
 
 import numpy as np
