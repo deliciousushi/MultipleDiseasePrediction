@@ -35,6 +35,7 @@ with st.sidebar:
                            icons=['activity', 'heart', 'person', 'droplet'],
                            default_index=0)
 
+
 # Convert 12-hour time format to 24-hour integer
 def convert_to_24hr(time_str):
     time_str = time_str.strip().lower()
@@ -114,28 +115,24 @@ def show_doctor_booking(specialty, doctor_data):
                 key=f"date_{doctor_key}"
             )
 
-            # Validate if doctor is available on selected date and time
-            if not is_available_on_date(appointment_date, available_days, start_hour, end_hour):
-                st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')} at that time.")
-                st.form_submit_button("Unavailable")  # A dummy button that will not submit
-                continue
+            # Check if doctor is available on selected date and time
+            if is_available_on_date(appointment_date, available_days, start_hour, end_hour):
+                # If valid day is selected, show the time selection and submit button
+                available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
+                appointment_time = st.selectbox(
+                    f"Choose a time for {row['Doctor Name']}",
+                    available_times,
+                    key=f"time_{doctor_key}"
+                )
+                submitted = st.form_submit_button("Book Appointment")
 
-            # Available times for the doctor (times are generated based on start_hour and end_hour)
-            available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
-            appointment_time = st.selectbox(
-                f"Choose a time for {row['Doctor Name']}",
-                available_times,
-                key=f"time_{doctor_key}"
-            )
-
-            # Submit button for the form
-            submitted = st.form_submit_button("Book Appointment")
-
-            # Handle form submission
-            if submitted:
-                confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
-                st.experimental_set_query_params(doctor=row['Doctor Name'])
-                st.rerun()
+                # Handle form submission
+                if submitted:
+                    confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
+                    st.experimental_set_query_params(doctor=row['Doctor Name'])
+                    st.rerun()
+            else:
+                st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}.")
 
     # Show confirmation message outside the loop
     if "appointment" in st.session_state:
