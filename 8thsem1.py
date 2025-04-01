@@ -47,29 +47,33 @@ def convert_to_24hr(time_str):
         return hour if hour == 12 else hour + 12
     return None
 
-# Extract available days and time range
+# Extract days and availability hours from the doctor's availability string
 def extract_availability(availability_str):
     try:
-        parts = availability_str.rsplit(" ", 1)  # Split days and time
-        days, time_range = parts[0], parts[1]
+        # Example format: "Mon-Fri 9am-5pm"
+        days_str, time_range = availability_str.split(" ")
+        available_days = days_str.split("-")  # ["Mon", "Fri"] or a single day like ["Mon"]
+        
+        # Parse start and end times
         start_time, end_time = time_range.split("-")
-
-        available_days = days.split(",")  # Example: "Monday-Friday" → ["Monday", "Friday"]
-        start_hour, end_hour = convert_to_24hr(start_time), convert_to_24hr(end_time)
-
+        
+        # Convert to 24-hour format
+        start_hour = convert_to_24hr(start_time)
+        end_hour = convert_to_24hr(end_time)
+        
         return available_days, start_hour, end_hour
-    except (ValueError, IndexError):
+    except ValueError:
         return None, None, None
 
-# Check if selected date is within available days
-def is_available_on_day(selected_date, available_days):
-    selected_day = selected_date.strftime("%A")  # Convert date to weekday name
-    return any(selected_day in day for day in available_days)
+# Check if doctor is available on the selected day
+def is_available_on_day(appointment_date, available_days):
+    # Convert the day to a weekday (e.g., "Mon", "Tue", etc.)
+    day_name = appointment_date.strftime('%a')  # Abbreviated day name (e.g., "Mon")
+    return day_name in available_days
 
 # Store booking confirmation
 def confirm_booking(doctor_name, date, time):
     st.session_state["appointment"] = f"✅ Appointment confirmed with {doctor_name} on {date} at {time}."
-
 
 # Function to display doctor booking
 def show_doctor_booking(specialty, doctor_data):
@@ -93,7 +97,9 @@ def show_doctor_booking(specialty, doctor_data):
             st.error(f"Invalid availability format for {row['Doctor Name']}.")
             continue
 
+        # Create a form for each doctor
         with st.form(f"booking_form_{doctor_key}"):
+            # Appointment date input
             appointment_date = st.date_input(
                 f"Select a date for {row['Doctor Name']}",
                 min_value=datetime.today().date(),
@@ -103,15 +109,19 @@ def show_doctor_booking(specialty, doctor_data):
             # Validate if doctor is available on selected day
             if not is_available_on_day(appointment_date, available_days):
                 st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}.")
+                # Do not show the submit button if the doctor is unavailable on the selected day
+                st.form_submit_button("Unavailable")  # A dummy button that will not submit
                 continue
 
+            # Available times for the doctor
             available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
             appointment_time = st.selectbox(
                 f"Choose a time for {row['Doctor Name']}",
                 available_times,
                 key=f"time_{doctor_key}"
             )
-               # Add Submit Button
+
+            # Submit button for the form
             submitted = st.form_submit_button("Book Appointment")
 
             # Handle form submission
@@ -120,13 +130,11 @@ def show_doctor_booking(specialty, doctor_data):
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
                 st.rerun()
 
-            # Debugging - Check form has a submit button
-            if not submitted:
-                st.warning(f"⚠️ Submit button is missing or not working for {row['Doctor Name']}.")
-
     # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
+
+
 import numpy as np
 
 # Kidney Disease Prediction
