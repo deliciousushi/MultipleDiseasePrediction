@@ -104,14 +104,12 @@ def show_doctor_booking(specialty, doctor_data):
             continue
 
         with st.form(f"booking_form_{doctor_key}"):
-            # Date selection
             appointment_date = st.date_input(
                 f"Select a date for {row['Doctor Name']}",
                 min_value=datetime.today().date(),
                 key=f"date_{doctor_key}"
             )
 
-            # Check availability
             is_valid_date = is_available_on_date(
                 datetime.combine(appointment_date, datetime.min.time()),
                 available_days,
@@ -138,7 +136,9 @@ def show_doctor_booking(specialty, doctor_data):
                         "date": appointment_date.strftime("%Y-%m-%d"),
                         "time": appointment_time
                     }
-                    st.switch_page("patient_details.py")  # Redirect to patient details page
+                    # Redirect to patient details page using query parameters
+                    st.experimental_set_query_params(page="patient_details")
+                    st.rerun()
                 else:
                     st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}.")
 
