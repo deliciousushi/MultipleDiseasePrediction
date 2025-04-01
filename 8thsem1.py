@@ -56,62 +56,50 @@ def extract_time_range(availability_str):
     except ValueError:
         return None, None
 
-# Function to store booking confirmation
+# Function to confirm and redirect after booking
 def confirm_booking(doctor_name, date, time):
     st.session_state["appointment"] = f"✅ Appointment confirmed with {doctor_name} on {date} at {time}."
-# Function to display doctor booking
+
+# Function to show doctor booking
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
-    # Filter available doctors based on the specialty
+    # Filter available doctors
     available_doctors = doctor_data[doctor_data['Specialty'] == specialty]
-
     if available_doctors.empty:
         st.warning("No available doctors for this specialty.")
         return
 
-    # Iterate through available doctors and display booking options
-    for index, row in available_doctors.iterrows():  # Added index to make form key unique
-        doctor_key = f"{row['Doctor Name']}_{index}"  # Ensure unique form key
+    # Iterate over doctors
+    for index, row in available_doctors.iterrows():
+        doctor_key = f"{row['Doctor Name']}_{index}"  # Unique key
         st.write(f"**{row['Doctor Name']}** - {row['Location']}")
         st.write(f"📞 Contact: {row['Contact']}")
 
-        # Extract the start and end time from the doctor's availability
-        start_hour, end_hour = extract_time_range(row['Availability'])
-        if start_hour is None or end_hour is None:
-            st.error(f"Invalid availability format for {row['Doctor Name']}.")
-            continue
-
-        # Create a form to select appointment date and time
-        with st.form(f"booking_form_{doctor_key}"):  # Using unique key
+        # Create form for each doctor
+        with st.form(f"booking_form_{doctor_key}"):
             appointment_date = st.date_input(
                 f"Select a date for {row['Doctor Name']}",
                 min_value=datetime.today().date(),
-                key=f"date_{doctor_key}"  # Unique key for input field
+                key=f"date_{doctor_key}"
             )
-            available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
             appointment_time = st.selectbox(
                 f"Choose a time for {row['Doctor Name']}",
-                available_times,
-                key=f"time_{doctor_key}"  # Unique key for selectbox
+                [f"{h}:00" for h in range(9, 17)],  # Example available hours
+                key=f"time_{doctor_key}"
             )
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
-                # Store appointment details in session state
-                st.session_state["doctor_name"] = row['Doctor Name']
-                st.session_state["appointment_date"] = appointment_date
-                st.session_state["appointment_time"] = appointment_time
                 confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
 
-                # Show confirmation message
-                st.success(f"Appointment confirmed with {row['Doctor Name']} on {appointment_date} at {appointment_time}")
-
-                # Store query parameters for redirection
+                # ✅ Set query parameters for redirection
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
-                st.success(f"Redirecting to enter patient details for {row['Doctor Name']}...")
 
-    # Show confirmation message outside the loop
+                # ✅ Force Streamlit to rerun
+                st.experimental_rerun()
+
+    # Show confirmation message
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
 
