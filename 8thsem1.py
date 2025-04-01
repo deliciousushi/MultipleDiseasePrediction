@@ -35,7 +35,6 @@ with st.sidebar:
                            icons=['activity', 'heart', 'person', 'droplet'],
                            default_index=0)
 
-
 # Convert 12-hour time format to 24-hour integer
 def convert_to_24hr(time_str):
     time_str = time_str.strip().lower()
@@ -65,11 +64,20 @@ def extract_availability(availability_str):
     except ValueError:
         return None, None, None
 
-# Check if doctor is available on the selected day
-def is_available_on_day(appointment_date, available_days):
-    # Convert the day to a weekday (e.g., "Mon", "Tue", etc.)
+# Check if doctor is available on the selected date (both day of week and time)
+def is_available_on_date(appointment_date, available_days, start_hour, end_hour):
+    # Get the weekday as a three-letter abbreviation (e.g., "Mon", "Tue")
     day_name = appointment_date.strftime('%a')  # Abbreviated day name (e.g., "Mon")
-    return day_name in available_days
+    
+    # Check if the doctor is available on that day
+    if day_name not in available_days:
+        return False  # Not available on that day
+
+    # Ensure the appointment time falls within the doctor's available hours
+    appointment_hour = appointment_date.hour
+    if start_hour <= appointment_hour < end_hour:
+        return True
+    return False
 
 # Store booking confirmation
 def confirm_booking(doctor_name, date, time):
@@ -106,14 +114,13 @@ def show_doctor_booking(specialty, doctor_data):
                 key=f"date_{doctor_key}"
             )
 
-            # Validate if doctor is available on selected day
-            if not is_available_on_day(appointment_date, available_days):
-                st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}.")
-                # Do not show the submit button if the doctor is unavailable on the selected day
+            # Validate if doctor is available on selected date and time
+            if not is_available_on_date(appointment_date, available_days, start_hour, end_hour):
+                st.warning(f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')} at that time.")
                 st.form_submit_button("Unavailable")  # A dummy button that will not submit
                 continue
 
-            # Available times for the doctor
+            # Available times for the doctor (times are generated based on start_hour and end_hour)
             available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
             appointment_time = st.selectbox(
                 f"Choose a time for {row['Doctor Name']}",
@@ -133,6 +140,8 @@ def show_doctor_booking(specialty, doctor_data):
     # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
+
+
 
 
 import numpy as np
