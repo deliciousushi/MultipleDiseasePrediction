@@ -103,7 +103,6 @@ def show_doctor_booking(specialty, doctor_data):
             st.error(f"Invalid availability format for {row['Doctor Name']}.")
             continue
 
-        # **Session state to track warnings**
         if f"warning_{doctor_key}" not in st.session_state:
             st.session_state[f"warning_{doctor_key}"] = ""
 
@@ -114,8 +113,10 @@ def show_doctor_booking(specialty, doctor_data):
                 key=f"date_{doctor_key}"
             )
 
-            # Check if the selected date is valid
-            if is_available_on_date(datetime.combine(appointment_date, datetime.min.time()), available_days, start_hour, end_hour):
+            # Validate selected date
+            is_valid_date = is_available_on_date(datetime.combine(appointment_date, datetime.min.time()), available_days, start_hour, end_hour)
+
+            if is_valid_date:
                 st.session_state[f"warning_{doctor_key}"] = ""  # Clear warning
                 available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
                 appointment_time = st.selectbox(
@@ -123,17 +124,20 @@ def show_doctor_booking(specialty, doctor_data):
                     available_times,
                     key=f"time_{doctor_key}"
                 )
-                submitted = st.form_submit_button("Book Appointment")
+            
+            # **Add a submit button inside the form**
+            submitted = st.form_submit_button("Book Appointment")
 
-                if submitted:
+            if submitted:
+                if is_valid_date:
                     confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
                     st.experimental_rerun()
-            else:
-                st.session_state[f"warning_{doctor_key}"] = f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}."
+                else:
+                    st.session_state[f"warning_{doctor_key}"] = f"⚠️ {row['Doctor Name']} is not available on {appointment_date.strftime('%A')}."
 
-        # **Show warning message outside the form**
         if st.session_state[f"warning_{doctor_key}"]:
             st.warning(st.session_state[f"warning_{doctor_key}"])
+
 
 
 import numpy as np
