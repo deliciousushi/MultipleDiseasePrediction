@@ -93,6 +93,9 @@ def show_doctor_booking(specialty, doctor_data):
                 st.session_state["appointment_time"] = appointment_time
                 confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
 
+                # Show confirmation message
+                st.success(f"Appointment confirmed with {row['Doctor Name']} on {appointment_date} at {appointment_time}")
+
                 # Redirect to patient details page with doctor name as query parameter
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
                 st.success(f"Redirecting to enter patient details for {row['Doctor Name']}...")
@@ -100,7 +103,6 @@ def show_doctor_booking(specialty, doctor_data):
     # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
-
 import numpy as np
 
 # Kidney Disease Prediction
