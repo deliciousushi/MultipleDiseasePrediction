@@ -39,52 +39,43 @@ with st.sidebar:
 
 # Helper function to convert 12-hour time (with am/pm) to 24-hour format
 def convert_to_24hr(time_str):
-    time_parts = time_str.strip()
-    if 'am' in time_parts:
-        hour = int(time_parts.split('am')[0])
-        if hour == 12:  # Handle 12am case
-            return 0
-        return hour
-    elif 'pm' in time_parts:
-        hour = int(time_parts.split('pm')[0])
-        if hour != 12:  # Handle 12pm case
-            return hour + 12
-    return 0  # Default case, should not reach here
+    if "am" in time_str:
+        hour = int(time_str.replace("am", "").strip())
+        return 0 if hour == 12 else hour  # 12 AM should be 0
+    elif "pm" in time_str:
+        hour = int(time_str.replace("pm", "").strip())
+        return hour if hour == 12 else hour + 12  # 12 PM should stay 12
+    return None
 
 # Function to display doctor booking option
 def show_doctor_booking(specialty):
     st.subheader("Book an Appointment")
-    
-    # Filter available doctors based on selected specialty
+
     available_doctors = doctor_data[doctor_data['Specialty'] == specialty]
-    
-    if not available_doctors.empty:
-        for _, row in available_doctors.iterrows():
-            st.write(f"**{row['Doctor Name']}** - {row['Location']}")
-            st.write(f"📞 Contact: {row['Contact']}")
-            st.write(f"🕒 Availability: {row['Availability']}")
-            
-            # Parse the availability range
-            availability = row['Availability'].split(' ')
-            days = availability[0].split('-')
-            hours = availability[1].split('-')
-            
-            # Convert availability hours to 24-hour format
-            start_hour = convert_to_24hr(hours[0])
-            end_hour = convert_to_24hr(hours[1])
-            
-            # Date picker for appointment date
-            appointment_date = st.date_input(f"Choose a date for your appointment with {row['Doctor Name']}", min_value=datetime.today())
-            
-            # Generate available times based on the doctor's availability
-            available_times = [f"{hour}:00" for hour in range(start_hour, end_hour)]
-            appointment_time = st.selectbox(f"Choose a time for your appointment with {row['Doctor Name']}", available_times)
-            
-            # Button to book an appointment
-            if st.button(f"Book Appointment with {row['Doctor Name']}"):
-                st.success(f"You have successfully booked an appointment with {row['Doctor Name']} on {appointment_date} at {appointment_time}!")
-    else:
+
+    if available_doctors.empty:
         st.warning("No available doctors for this specialty.")
+        return
+
+    for _, row in available_doctors.iterrows():
+        st.write(f"**{row['Doctor Name']}** - {row['Location']}")
+        st.write(f"📞 Contact: {row['Contact']}")
+        
+        # Extract availability time range
+        hours = row['Availability'].split('-')
+        start_hour, end_hour = convert_to_24hr(hours[0]), convert_to_24hr(hours[1])
+
+        # Date picker
+        appointment_date = st.date_input(f"Select a date for {row['Doctor Name']}", min_value=datetime.today().date())
+
+        # Generate available time slots
+        available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
+        appointment_time = st.selectbox(f"Choose a time for {row['Doctor Name']}", available_times)
+
+        # Booking button
+        if st.button(f"Book Appointment with {row['Doctor Name']}"):
+            st.success(f"Appointment confirmed with {row['Doctor Name']} on {appointment_date} at {appointment_time}.")
+
 
 import numpy as np
 
