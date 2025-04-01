@@ -35,7 +35,6 @@ with st.sidebar:
                            icons=['activity', 'heart', 'person', 'droplet'],
                            default_index=0)
 
-
 # Convert 12-hour time format to 24-hour integer
 def convert_to_24hr(time_str):
     time_str = time_str.strip().lower()
@@ -137,8 +136,6 @@ def show_doctor_booking(specialty, doctor_data):
     # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
-
-
 
 
 import numpy as np
