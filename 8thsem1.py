@@ -111,18 +111,22 @@ def show_doctor_booking(specialty, doctor_data):
                 available_times,
                 key=f"time_{doctor_key}"
             )
-            # Add the submit button here inside the form block
+               # Add Submit Button
             submitted = st.form_submit_button("Book Appointment")
 
+            # Handle form submission
             if submitted:
                 confirm_booking(row['Doctor Name'], appointment_date, appointment_time)
                 st.experimental_set_query_params(doctor=row['Doctor Name'])
                 st.rerun()
 
+            # Debugging - Check form has a submit button
+            if not submitted:
+                st.warning(f"⚠️ Submit button is missing or not working for {row['Doctor Name']}.")
+
     # Show confirmation message outside the loop
     if "appointment" in st.session_state:
         st.success(st.session_state["appointment"])
-
 import numpy as np
 
 # Kidney Disease Prediction
