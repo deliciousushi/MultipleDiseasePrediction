@@ -33,8 +33,7 @@ with st.sidebar:
                            ['Diabetes Prediction', 'Heart Disease Prediction', "Parkinson's Prediction", "Kidney Disease Prediction"],
                            menu_icon='hospital-fill',
                            icons=['activity', 'heart', 'person', 'droplet'],
-                           default_index=0)import streamlit as st
-import datetime
+                           default_index=0)
 
 # Convert 12-hour time format to 24-hour integer
 def convert_to_24hr(time_str):
