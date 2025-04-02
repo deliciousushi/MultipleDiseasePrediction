@@ -84,16 +84,16 @@ def is_available_on_date(appointment_date, available_days, start_hour, end_hour)
         return True
     return False
 
-# Book an appointment and persist UI state
+# Function to book an appointment and persist session state
 def book_appointment(doctor_name, appointment_date):
     st.session_state["appointment_details"] = {
         "doctor": doctor_name,
         "date": appointment_date.strftime("%Y-%m-%d")
     }
     st.session_state["show_patient_form"] = True
-    st.experimental_rerun()  # Forces Streamlit to refresh but keeps UI state
+    st.experimental_rerun()  # Forces a refresh while keeping session state intact
 
-# Display available doctors and appointment booking form
+# Function to display available doctors and booking form
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -138,7 +138,7 @@ def show_doctor_booking(specialty, doctor_data):
                 else:
                     st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
-# Patient details form (displays only after booking)
+# Function to show patient details form dynamically after booking
 def show_patient_details_form():
     st.subheader("Enter Patient Details")
 
@@ -157,7 +157,7 @@ def show_patient_details_form():
             }
             st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']}. The doctor will contact you soon.")
 
-# Prevent UI reset by skipping sidebar if appointment is in progress
+# Check if patient form needs to be displayed
 if st.session_state["show_patient_form"]:
     show_patient_details_form()
 
