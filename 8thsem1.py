@@ -46,20 +46,19 @@ def convert_to_24hr(time_str):
         return hour if hour == 12 else hour + 12
     return None
 
-# Extract days and availability hours from the doctor's availability string
+# Extract availability details
 def extract_availability(availability_str):
     try:
-        # Example format: "Mon-Fri 9am-5pm"
-        days_str, time_range = availability_str.split(" ")
-        available_days = days_str.split("-")  # ["Mon", "Fri"] or a single day like ["Mon"]
-        
-        # Parse start and end times
+        parts = availability_str.split(" ")
+        days_str = parts[0]  # "Mon-Fri"
+        time_range = parts[1]  # "9am-5pm"
+
+        available_days = days_str.split("-")
         start_time, end_time = time_range.split("-")
-        
-        # Convert to 24-hour format
+
         start_hour = convert_to_24hr(start_time)
         end_hour = convert_to_24hr(end_time)
-        
+
         return available_days, start_hour, end_hour
     except ValueError:
         return None, None, None
@@ -87,7 +86,8 @@ def confirm_booking(doctor_name, date, time):
         "time": time
     }
     st.rerun()
-# Show available doctors and allow booking
+    
+# Show available doctors
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -105,7 +105,7 @@ def show_doctor_booking(specialty, doctor_data):
         st.write(f"**{doctor_name}** - {location}")
         st.write(f"📞 Contact: {contact}")
 
-        # Extract availability
+        # Extract availability info
         available_days, start_hour, end_hour = extract_availability(row["Availability"])
 
         if available_days is None:
@@ -122,14 +122,14 @@ def show_doctor_booking(specialty, doctor_data):
                 min_value=datetime.today().date()
             )
 
-            # Ensure doctor is available on the selected date
-            is_valid_date = is_available_on_date(appointment_date, available_days)
+            is_valid_date = is_available_on_date(appointment_date, available_days, start_hour, end_hour)
 
             if is_valid_date:
                 available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
                 appointment_time = st.selectbox("Select a time", available_times)
             else:
                 appointment_time = None
+                st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
             submitted = st.form_submit_button("Book Appointment")
 
@@ -161,8 +161,6 @@ def show_patient_details_form():
                 "contact": patient_contact
             }
             st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
-
-
 
 import numpy as np
 
