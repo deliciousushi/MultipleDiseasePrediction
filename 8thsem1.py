@@ -45,6 +45,12 @@ def convert_to_24hr(time_str):
         hour = int(time_str.replace("pm", "").strip())
         return hour if hour == 12 else hour + 12
     return None
+    
+# Ensure session state keys are initialized
+if "appointment_details" not in st.session_state:
+    st.session_state["appointment_details"] = None
+if "show_patient_form" not in st.session_state:
+    st.session_state["show_patient_form"] = False
 
 # Extract availability details
 def extract_availability(availability_str):
@@ -134,7 +140,7 @@ def show_doctor_booking(specialty, doctor_data):
                         "time": None  # Will set time later
                     }
                     st.session_state["show_patient_form"] = True
-                    st.rerun()
+                    st.experimental_rerun()
                 else:
                     st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
@@ -158,9 +164,8 @@ def show_patient_details_form():
             st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
 
 # Ensure Patient Details Form Appears Dynamically
-if "show_patient_form" in st.session_state and st.session_state["show_patient_form"]:
+if st.session_state["show_patient_form"]:
     show_patient_details_form()
-
 
 import numpy as np
 
