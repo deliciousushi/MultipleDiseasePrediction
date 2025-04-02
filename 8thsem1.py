@@ -87,43 +87,58 @@ def confirm_booking(doctor_name, date, time):
         "time": time
     }
     st.rerun()
-    
-def show_doctor_booking(specialty,doctor_data):
+    # Show available doctors and allow booking
+def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
-    for doctor in doctor_data:
-        st.write(f"**{doctor_data['Doctor name']}** - {doctor_data['location']}")
-        st.write(f"📞 Contact: {doctor_data['contact']}")
+    available_doctors = doctor_data[doctor_data["Specialty"] == specialty]
 
-        # Show doctor's available days & times
-        st.write(f"📅 **Available Days:** {', '.join(doctor_data['availability']['days'])}")
-        st.write(f"⏰ **Available Times:** {', '.join(doctor_data['availability']['times'])}")
+    if available_doctors.empty:
+        st.warning("No doctors available for this specialty.")
+        return
 
-        with st.form(f"form_{doctor['name']}"):
+    for index, row in available_doctors.iterrows():
+        doctor_name = row["Doctor Name"]
+        location = row["Location"]
+        contact = row["Contact"]
+
+        st.write(f"**{doctor_name}** - {location}")
+        st.write(f"📞 Contact: {contact}")
+
+        # Extract availability
+        available_days, start_hour, end_hour = extract_availability(row["Availability"])
+
+        if available_days is None:
+            st.error(f"Invalid availability format for {doctor_name}.")
+            continue
+
+        # Show availability info
+        st.write(f"📅 **Available Days:** {', '.join(available_days)}")
+        st.write(f"⏰ **Available Times:** {start_hour}:00 - {end_hour}:00")
+
+        with st.form(f"booking_form_{index}"):
             appointment_date = st.date_input(
-                f"Select a date for {doctor_data['Doctor name']}",
+                f"Select a date for {doctor_name}",
                 min_value=datetime.today().date()
             )
 
-            # Extract the weekday name from the selected date
-            selected_day = appointment_date.strftime("%a")  # e.g., "Mon", "Tue"
+            # Check if doctor is available on selected date
+            if is_available_on_date(appointment_date, available_days):
+                available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
+                appointment_time = st.selectbox("Select a time", available_times)
 
-            # Check if selected day is within doctor's available days
-            if selected_day in doctor_data["availability"]["days"]:
-                appointment_time = st.selectbox(
-                    "Select a time",
-                    doctor["availability"]["times"]
-                )
                 submitted = st.form_submit_button("Book Appointment")
 
                 if submitted:
-                    confirm_booking(doctor_data["Doctor name"], appointment_date.strftime("%Y-%m-%d"), appointment_time)
+                    confirm_booking(doctor_name, appointment_date.strftime("%Y-%m-%d"), appointment_time)
             else:
-                st.warning(f"⚠️ {doctor_data['Doctor name']} is not available on {selected_day}.")
+                st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
+    # Show patient details form if booking is successful
     if "appointment_details" in st.session_state:
         show_patient_details_form()
 
+# Patient details form
 def show_patient_details_form():
     st.subheader("Enter Patient Details")
 
@@ -141,27 +156,7 @@ def show_patient_details_form():
                 "contact": patient_contact
             }
             st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
-    # **Show Patient Details Form after Booking**
-    if "appointment_details" in st.session_state:
-        st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']} at {st.session_state['appointment_details']['time']}.")
 
-        with st.form("patient_details_form"):
-            st.subheader("Enter Patient Details")
-            patient_name = st.text_input("Full Name", key="patient_name")
-            patient_age = st.number_input("Age", min_value=0, step=1, key="patient_age")
-            patient_contact = st.text_input("Contact Number", key="patient_contact")
-            symptoms = st.text_area("Describe your symptoms", key="symptoms")
-
-            submit_patient_details = st.form_submit_button("Confirm Appointment")
-
-            if submit_patient_details:
-                st.session_state["final_confirmation"] = {
-                    "name": patient_name,
-                    "age": patient_age,
-                    "contact": patient_contact,
-                    "symptoms": symptoms
-                }
-                st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
 
 
 
