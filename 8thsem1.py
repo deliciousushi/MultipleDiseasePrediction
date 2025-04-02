@@ -94,10 +94,11 @@ def book_appointment(doctor_name, appointment_date):
     st.experimental_rerun()  # Forces UI update **while keeping session state intact**
 
 # Function to display doctors & booking form
-def show_doctor_booking(specialty, doctor_data):
+def show_doctor_booking(specialty,doctor_data):
     st.subheader("Book an Appointment")
 
-    available_doctors = doctor_data[doctor_data["Specialty"] == specialty]
+    available_doctors = st.session_state["doctor_data"]
+    available_doctors = available_doctors[available_doctors["Specialty"] == specialty]
 
     if available_doctors.empty:
         st.warning("No doctors available for this specialty.")
@@ -155,9 +156,11 @@ def show_patient_details_form():
             }
             st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']}. The doctor will contact you soon.")
 
-# Make sure patient form appears **AFTER** booking
+# ✅ If an appointment is booked, show patient form, otherwise show doctor booking
 if st.session_state["show_patient_form"]:
     show_patient_details_form()
+else:
+    show_doctor_booking(specialty,doctor_data)
 
 import numpy as np
 
