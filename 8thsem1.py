@@ -86,8 +86,7 @@ def confirm_booking(doctor_name, date, time):
         "time": time
     }
     st.rerun()
-    
-# Show available doctors
+    # Show available doctors
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -112,7 +111,6 @@ def show_doctor_booking(specialty, doctor_data):
             st.error(f"Invalid availability format for {doctor_name}.")
             continue
 
-        # Show availability info
         st.write(f"📅 **Available Days:** {', '.join(available_days)}")
         st.write(f"⏰ **Available Times:** {start_hour}:00 - {end_hour}:00")
 
@@ -139,7 +137,7 @@ def show_doctor_booking(specialty, doctor_data):
                 else:
                     st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
-    # Show patient details form if booking is successful
+    # Dynamically show patient details form after booking
     if "appointment_details" in st.session_state:
         show_patient_details_form()
 
