@@ -101,11 +101,13 @@ def show_doctor_booking(specialty, doctor_data):
         doctor_name = row["Doctor Name"]
         location = row["Location"]
         contact = row["Contact"]
+        
+        # Generate a unique key for each doctor
+        doctor_key = f"doctor_{index}"
 
         st.write(f"**{doctor_name}** - {location}")
         st.write(f"📞 Contact: {contact}")
 
-        # Extract availability info
         available_days, start_hour, end_hour = extract_availability(row["Availability"])
 
         if available_days is None:
@@ -115,26 +117,23 @@ def show_doctor_booking(specialty, doctor_data):
         st.write(f"📅 **Available Days:** {', '.join(available_days)}")
         st.write(f"⏰ **Available Times:** {start_hour}:00 - {end_hour}:00")
 
-        with st.form(f"booking_form_{index}"):
+        with st.form(f"booking_form_{doctor_key}"):
             appointment_date = st.date_input(
                 f"Select a date for {doctor_name}",
-                min_value=datetime.today().date()
+                min_value=datetime.today().date(),
+                key=f"date_{doctor_key}"
             )
-
-            is_valid_date = is_available_on_date(appointment_date, available_days)
-
-            if is_valid_date:
-                available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
-                appointment_time = st.selectbox("Select a time", available_times)
-            else:
-                appointment_time = None
-                st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
-                if is_valid_date and appointment_time:
-                    confirm_booking(doctor_name, appointment_date.strftime("%Y-%m-%d"), appointment_time)
+                if is_available_on_date(appointment_date, available_days, start_hour, end_hour):
+                    st.session_state["appointment_details"] = {
+                        "doctor": doctor_name,
+                        "date": appointment_date.strftime("%Y-%m-%d"),
+                        "time": None  # Will set time later
+                    }
+                    st.session_state["show_patient_form"] = True
                     st.rerun()
                 else:
                     st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
@@ -157,9 +156,11 @@ def show_patient_details_form():
                 "contact": patient_contact
             }
             st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
+
 # Ensure Patient Details Form Appears Dynamically
 if "show_patient_form" in st.session_state and st.session_state["show_patient_form"]:
     show_patient_details_form()
+
 
 import numpy as np
 
