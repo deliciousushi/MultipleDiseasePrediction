@@ -92,16 +92,16 @@ def show_doctor_booking(specialty,doctor_data):
     st.subheader("Book an Appointment")
 
     for doctor in doctor_data:
-        st.write(f"**{doctor['name']}** - {doctor['location']}")
-        st.write(f"📞 Contact: {doctor['contact']}")
+        st.write(f"**{doctor_data['Doctor name']}** - {doctor_data['location']}")
+        st.write(f"📞 Contact: {doctor_data['contact']}")
 
         # Show doctor's available days & times
-        st.write(f"📅 **Available Days:** {', '.join(doctor['availability']['days'])}")
-        st.write(f"⏰ **Available Times:** {', '.join(doctor['availability']['times'])}")
+        st.write(f"📅 **Available Days:** {', '.join(doctor_data['availability']['days'])}")
+        st.write(f"⏰ **Available Times:** {', '.join(doctor_data['availability']['times'])}")
 
         with st.form(f"form_{doctor['name']}"):
             appointment_date = st.date_input(
-                f"Select a date for {doctor['name']}",
+                f"Select a date for {doctor_data['Doctor name']}",
                 min_value=datetime.today().date()
             )
 
@@ -109,7 +109,7 @@ def show_doctor_booking(specialty,doctor_data):
             selected_day = appointment_date.strftime("%a")  # e.g., "Mon", "Tue"
 
             # Check if selected day is within doctor's available days
-            if selected_day in doctor["availability"]["days"]:
+            if selected_day in doctor_data["availability"]["days"]:
                 appointment_time = st.selectbox(
                     "Select a time",
                     doctor["availability"]["times"]
