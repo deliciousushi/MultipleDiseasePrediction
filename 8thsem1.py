@@ -84,16 +84,16 @@ def is_available_on_date(appointment_date, available_days, start_hour, end_hour)
         return True
     return False
 
-# Function to book an appointment and persist session state
+# Function to handle booking an appointment
 def book_appointment(doctor_name, appointment_date):
     st.session_state["appointment_details"] = {
         "doctor": doctor_name,
         "date": appointment_date.strftime("%Y-%m-%d")
     }
     st.session_state["show_patient_form"] = True
-    st.experimental_rerun()  # Forces a refresh while keeping session state intact
+    st.experimental_rerun()  # Forces UI update **while keeping session state intact**
 
-# Function to display available doctors and booking form
+# Function to display doctors & booking form
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -109,8 +109,6 @@ def show_doctor_booking(specialty, doctor_data):
         contact = row["Contact"]
         availability_str = row["Availability"]
 
-        doctor_key = f"doctor_{index}"
-
         st.write(f"**{doctor_name}** - {location}")
         st.write(f"📞 Contact: {contact}")
 
@@ -123,11 +121,11 @@ def show_doctor_booking(specialty, doctor_data):
         st.write(f"📅 **Available Days:** {', '.join(available_days)}")
         st.write(f"⏰ **Available Times:** {start_hour}:00 - {end_hour}:00")
 
-        with st.form(key=f"booking_form_{doctor_key}"):
+        with st.form(key=f"booking_form_{index}"):
             appointment_date = st.date_input(
                 f"Select a date for {doctor_name}",
                 min_value=datetime.today().date(),
-                key=f"date_{doctor_key}"
+                key=f"date_{index}"
             )
 
             submitted = st.form_submit_button("Book Appointment")
@@ -138,7 +136,7 @@ def show_doctor_booking(specialty, doctor_data):
                 else:
                     st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
-# Function to show patient details form dynamically after booking
+# Function to show patient details form
 def show_patient_details_form():
     st.subheader("Enter Patient Details")
 
@@ -157,7 +155,7 @@ def show_patient_details_form():
             }
             st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']}. The doctor will contact you soon.")
 
-# Check if patient form needs to be displayed
+# Make sure patient form appears **AFTER** booking
 if st.session_state["show_patient_form"]:
     show_patient_details_form()
 
