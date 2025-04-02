@@ -85,7 +85,9 @@ def confirm_booking(doctor_name, date, time):
         "date": date,
         "time": time
     }
-    st.rerun()# Show available doctors
+    st.rerun()
+
+# Show available doctors
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -119,7 +121,7 @@ def show_doctor_booking(specialty, doctor_data):
                 min_value=datetime.today().date()
             )
 
-            is_valid_date = is_available_on_date(appointment_date, available_days, start_hour, end_hour)
+            is_valid_date = is_available_on_date(appointment_date, available_days)
 
             if is_valid_date:
                 available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
@@ -133,7 +135,7 @@ def show_doctor_booking(specialty, doctor_data):
             if submitted:
                 if is_valid_date and appointment_time:
                     confirm_booking(doctor_name, appointment_date.strftime("%Y-%m-%d"), appointment_time)
-                    st.rerun()  # Ensure UI updates dynamically
+                    st.rerun()
                 else:
                     st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
@@ -155,6 +157,9 @@ def show_patient_details_form():
                 "contact": patient_contact
             }
             st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
+# Ensure Patient Details Form Appears Dynamically
+if st.session_state["show_patient_form"]:
+    show_patient_details_form()
 
 import numpy as np
 
