@@ -84,15 +84,6 @@ def is_available_on_date(appointment_date, available_days, start_hour, end_hour)
         return True
     return False
 
-# Store booking confirmation
-def confirm_booking(doctor_name, date, time):
-    st.session_state["appointment_details"] = {
-        "doctor": doctor_name,
-        "date": date,
-        "time": time
-    }
-    st.rerun()
-
 # Show available doctors
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
