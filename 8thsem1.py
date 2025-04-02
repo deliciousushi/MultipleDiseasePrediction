@@ -117,9 +117,9 @@ def show_doctor_booking(specialty,doctor_data):
                 submitted = st.form_submit_button("Book Appointment")
 
                 if submitted:
-                    confirm_booking(doctor["name"], appointment_date.strftime("%Y-%m-%d"), appointment_time)
+                    confirm_booking(doctor_data["Doctor name"], appointment_date.strftime("%Y-%m-%d"), appointment_time)
             else:
-                st.warning(f"⚠️ {doctor['name']} is not available on {selected_day}.")
+                st.warning(f"⚠️ {doctor_data['Doctor name']} is not available on {selected_day}.")
 
     if "appointment_details" in st.session_state:
         show_patient_details_form()
