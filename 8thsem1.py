@@ -91,7 +91,7 @@ def confirm_booking(doctor_name, date, time):
 def show_doctor_booking(specialty,doctor_data):
     st.subheader("Book an Appointment")
 
-    for doctor in doctors:
+    for doctor in doctor_data:
         st.write(f"**{doctor['name']}** - {doctor['location']}")
         st.write(f"📞 Contact: {doctor['contact']}")
 
