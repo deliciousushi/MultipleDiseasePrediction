@@ -85,8 +85,7 @@ def confirm_booking(doctor_name, date, time):
         "date": date,
         "time": time
     }
-    st.rerun()
-    # Show available doctors
+    st.rerun()# Show available doctors
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -134,12 +133,9 @@ def show_doctor_booking(specialty, doctor_data):
             if submitted:
                 if is_valid_date and appointment_time:
                     confirm_booking(doctor_name, appointment_date.strftime("%Y-%m-%d"), appointment_time)
+                    st.rerun()  # Ensure UI updates dynamically
                 else:
                     st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
-
-    # Dynamically show patient details form after booking
-    if "appointment_details" in st.session_state:
-        show_patient_details_form()
 
 # Patient details form
 def show_patient_details_form():
