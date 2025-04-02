@@ -158,7 +158,7 @@ def show_patient_details_form():
             }
             st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
 # Ensure Patient Details Form Appears Dynamically
-if st.session_state["show_patient_form"]:
+if "show_patient_form" in st.session_state and st.session_state["show_patient_form"]:
     show_patient_details_form()
 
 import numpy as np
