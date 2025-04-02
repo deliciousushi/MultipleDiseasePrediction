@@ -84,16 +84,16 @@ def is_available_on_date(appointment_date, available_days, start_hour, end_hour)
         return True
     return False
 
-# Function to book an appointment
+# Book an appointment and persist UI state
 def book_appointment(doctor_name, appointment_date):
     st.session_state["appointment_details"] = {
         "doctor": doctor_name,
         "date": appointment_date.strftime("%Y-%m-%d")
     }
     st.session_state["show_patient_form"] = True
-    st.experimental_rerun()
+    st.experimental_rerun()  # Forces Streamlit to refresh but keeps UI state
 
-# Function to display available doctors
+# Display available doctors and appointment booking form
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -109,7 +109,6 @@ def show_doctor_booking(specialty, doctor_data):
         contact = row["Contact"]
         availability_str = row["Availability"]
 
-        # Generate a unique key for each doctor
         doctor_key = f"doctor_{index}"
 
         st.write(f"**{doctor_name}** - {location}")
@@ -139,7 +138,7 @@ def show_doctor_booking(specialty, doctor_data):
                 else:
                     st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
-# Function to collect patient details
+# Patient details form (displays only after booking)
 def show_patient_details_form():
     st.subheader("Enter Patient Details")
 
@@ -156,9 +155,9 @@ def show_patient_details_form():
                 "age": patient_age,
                 "contact": patient_contact
             }
-            st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
+            st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']}. The doctor will contact you soon.")
 
-# Ensure Patient Details Form Appears Dynamically
+# Prevent UI reset by skipping sidebar if appointment is in progress
 if st.session_state["show_patient_form"]:
     show_patient_details_form()
 
