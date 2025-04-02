@@ -87,7 +87,7 @@ def confirm_booking(doctor_name, date, time):
         "time": time
     }
     st.rerun()
-    # Show available doctors and allow booking
+# Show available doctors and allow booking
 def show_doctor_booking(specialty, doctor_data):
     st.subheader("Book an Appointment")
 
@@ -122,17 +122,22 @@ def show_doctor_booking(specialty, doctor_data):
                 min_value=datetime.today().date()
             )
 
-            # Check if doctor is available on selected date
-            if is_available_on_date(appointment_date, available_days):
+            # Ensure doctor is available on the selected date
+            is_valid_date = is_available_on_date(appointment_date, available_days)
+
+            if is_valid_date:
                 available_times = [f"{h}:00" for h in range(start_hour, end_hour)]
                 appointment_time = st.selectbox("Select a time", available_times)
-
-                submitted = st.form_submit_button("Book Appointment")
-
-                if submitted:
-                    confirm_booking(doctor_name, appointment_date.strftime("%Y-%m-%d"), appointment_time)
             else:
-                st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
+                appointment_time = None
+
+            submitted = st.form_submit_button("Book Appointment")
+
+            if submitted:
+                if is_valid_date and appointment_time:
+                    confirm_booking(doctor_name, appointment_date.strftime("%Y-%m-%d"), appointment_time)
+                else:
+                    st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
 
     # Show patient details form if booking is successful
     if "appointment_details" in st.session_state:
@@ -156,7 +161,6 @@ def show_patient_details_form():
                 "contact": patient_contact
             }
             st.success("✅ Appointment successfully booked! The doctor will contact you soon.")
-
 
 
 
