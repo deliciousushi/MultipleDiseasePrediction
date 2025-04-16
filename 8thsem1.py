@@ -146,7 +146,7 @@ def show_doctor_booking():
                 dt_combined = datetime.combine(appt_date, appt_time)
                 if is_available_on_date(dt_combined, days, start_hr, end_hr):
                     save_appointment(st.session_state.username, doctor, specialty, appt_date, appt_time.strftime('%H:%M'))
-                    st.success(f"Appointment booked with Dr. {doctor_name} on {appt_date} at {appt_time.strftime('%H:%M')}")
+                    st.success(f"Appointment booked successfully!")
                 else:
                     st.error("Doctor not available on selected date/time")
 
