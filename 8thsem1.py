@@ -213,7 +213,7 @@ if selected == "Kidney Disease Prediction":
             prediction = kidney_model.predict(user_input)[0]
             if prediction == 1:
                 st.error("The person has kidney disease.")
-                show_doctor_booking("Nephrologist",doctor_data)
+                show_doctor_booking()
             else:
                 st.success("The person does not have kidney disease.")
         else:
