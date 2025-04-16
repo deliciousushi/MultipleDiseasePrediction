@@ -65,9 +65,11 @@ def is_available_on_date(date, days, start_hr, end_hr):
     hour = date.hour
     return (day in days) and (start_hr <= hour < end_hr)
 
-def save_appointment(name, age, contact, doctor, specialty, date, time):
+def save_appointment(patient_name, patient_age, patient_contact, doctor, specialty, appt_date, appt_time):
+    appointments_file = f"{working_dir}/appointments.csv"
+    new_entry = f"{patient_name},{patient_age},{patient_contact},{doctor},{specialty},{appt_date},{appt_time}\n"
     with open(appointments_file, "a") as f:
-        f.write(f"{name},{age},{contact},{doctor},{specialty},{date},{time}\n")
+        f.write(new_entry)
 
 def show_doctor_booking():
     st.subheader("Book an Appointment")
@@ -95,7 +97,6 @@ def show_doctor_booking():
         st.write(f"📞 Contact: {contact}")
 
         days, start_hr, end_hr = extract_availability(avail_str)
-
         if not days:
             st.error(f"Invalid availability format for {doctor}.")
             continue
@@ -103,26 +104,22 @@ def show_doctor_booking():
         st.write(f"📅 **Days:** {', '.join(days)}")
         st.write(f"⏰ **Time:** {start_hr}:00 - {end_hr}:00")
 
-        unique_suffix = uuid.uuid4()
-
-        with st.form(key=f"form_{idx}_{unique_suffix}"):
-            appt_date = st.date_input("Select date", min_value=datetime.today().date(), key=f"date_{idx}_{unique_suffix}")
-            appt_time = st.time_input("Select time", key=f"time_{idx}_{unique_suffix}")
-            submitted = st.form_submit_button("Book Appointment")
-
-        if submitted:
+        appt_date = st.date_input(f"Select date for {doctor}", min_value=datetime.today().date(), key=f"date_{idx}")
+        appt_time = st.time_input(f"Select time for {doctor}", key=f"time_{idx}")
+        
+        if st.button(f"Book Appointment with {doctor}", key=f"book_btn_{idx}"):
             dt_combined = datetime.combine(appt_date, appt_time)
             if is_available_on_date(dt_combined, days, start_hr, end_hr):
-                st.session_state["appointment_details"] = {
-                    "doctor": doctor,
-                    "specialty": specialty,
-                    "date": appt_date.strftime('%Y-%m-%d'),
-                    "time": appt_time.strftime('%H:%M')
-                }
+                # Store for patient form
+                st.session_state["selected_doctor"] = doctor
+                st.session_state["selected_specialty"] = specialty
+                st.session_state["appointment_date"] = str(appt_date)
+                st.session_state["appointment_time"] = appt_time.strftime('%H:%M')
                 st.session_state["show_patient_form"] = True
-                st.experimental_rerun()
+                st.rerun()
             else:
-                st.error("Doctor not available on selected date/time")
+                st.error("Doctor not available at this time.")
+
 
 
 def show_patient_details_form():
@@ -136,24 +133,17 @@ def show_patient_details_form():
         submit_patient_details = st.form_submit_button("Confirm Appointment")
 
         if submit_patient_details:
-            details = st.session_state["appointment_details"]
-            new_row = {
-                "Name": patient_name,
-                "Age": patient_age,
-                "Contact": patient_contact,
-                "Doctor Name": details["doctor"],
-                "Specialization": details["specialty"],
-                "Date": details["date"],
-                "Time": details["time"]
-            }
-            appt_df = pd.DataFrame([new_row])
-
-            appointments_file = f"{working_dir}/appointments.csv"
-            appt_df.to_csv(appointments_file, mode='a', index=False, header=not os.path.exists(appointments_file))
-
-            st.success(f"✅ Appointment confirmed with Dr. {details['doctor']} on {details['date']} at {details['time']}")
-            st.session_state["show_patient_form"] = False
-            st.session_state["appointment_details"] = None
+            save_appointment(
+                patient_name,
+                patient_age,
+                patient_contact,
+                st.session_state["selected_doctor"],
+                st.session_state["selected_specialty"],
+                st.session_state["appointment_date"],
+                st.session_state["appointment_time"]
+            )
+            st.success(f"✅ Appointment confirmed with Dr. {st.session_state['selected_doctor']} on {st.session_state['appointment_date']} at {st.session_state['appointment_time']}.")
+            st.session_state["show_patient_form"] = False  # Reset form
 
 
 # Render based on session state
