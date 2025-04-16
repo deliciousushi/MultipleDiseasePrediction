@@ -6,6 +6,8 @@ from datetime import datetime
 import streamlit as st
 from streamlit_option_menu import option_menu
 from tensorflow import keras
+import uuid
+
 
 # Page config
 st.set_page_config(page_title="Health Assistant", layout="wide", page_icon="👩‍⚕️")
@@ -101,7 +103,7 @@ def show_doctor_booking():
         st.write(f"📅 **Days:** {', '.join(days)}")
         st.write(f"⏰ **Time:** {start_hr}:00 - {end_hr}:00")
 
-        with st.form(key=f"form_{idx}"):
+        with st.form(key=f"form_{idx}_{uuid.uuid4()}"):
             appt_date = st.date_input("Select date", min_value=datetime.today().date(), key=f"date_{idx}")
             appt_time = st.time_input("Select time", key=f"time_{idx}")
             submitted = st.form_submit_button("Book Appointment")
