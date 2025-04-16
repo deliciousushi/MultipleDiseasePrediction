@@ -27,6 +27,13 @@ if os.path.exists(doctor_file):
 else:
     doctor_data = pd.DataFrame(columns=["Doctor Name", "Specialty", "Location", "Contact", "Availability"])
 
+# Ensure doctor_data and specialty are stored in session state
+if "doctor_data" not in st.session_state:
+    st.session_state["doctor_data"] = doctor_data
+if "selected_specialty" not in st.session_state:
+    st.session_state["selected_specialty"] = None
+
+
 # Sidebar navigation
 with st.sidebar:
     selected = option_menu('Multiple Disease Prediction System',
@@ -94,12 +101,18 @@ def book_appointment(doctor_name, appointment_date):
     st.experimental_rerun()  # Forces UI update **while keeping session state intact**
 
 # Function to display doctors & booking form
-def show_doctor_booking(specialty,doctor_data):
+def show_doctor_booking():
     st.subheader("Book an Appointment")
 
-    available_doctors = st.session_state["doctor_data"]
-    available_doctors = available_doctors[available_doctors["Specialty"] == specialty]
+    specialty = st.session_state.get("selected_specialty")
+    doctor_data = st.session_state.get("doctor_data")
 
+    if not specialty or doctor_data.empty:
+        st.warning("No specialty selected or doctor data missing.")
+        return
+
+    available_doctors = doctor_data[doctor_data["Specialty"] == specialty]
+    
     if available_doctors.empty:
         st.warning("No doctors available for this specialty.")
         return
