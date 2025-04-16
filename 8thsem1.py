@@ -24,12 +24,11 @@ with open(f"{working_dir}/kidney_model (2).sav", "rb") as f:
 doctor_file = f'{working_dir}/doctors_list (1).csv'
 doctor_data = pd.read_csv(doctor_file) if os.path.exists(doctor_file) else pd.DataFrame(columns=["Doctor Name", "Specialty", "Location", "Contact", "Availability"])
 
-# Load credentials
-USER_CREDENTIALS = {
-    "alok": "1234",
-    "rahul": "abcd",
-    "test": "test"
-}
+# Create appointment log file if missing
+appointments_file = f"{working_dir}/appointments.csv"
+if not os.path.exists(appointments_file):
+    with open(appointments_file, "w") as f:
+        f.write("Patient Name,Age,Contact,Doctor Name,Specialization,Date,Time\n")
 
 # Ensure session state
 if "doctor_data" not in st.session_state:
@@ -37,42 +36,7 @@ if "doctor_data" not in st.session_state:
 if "selected_specialty" not in st.session_state:
     st.session_state["selected_specialty"] = None
 if "appointment_details" not in st.session_state:
-    st.session_state["appointment_details"] = None
-if "show_patient_form" not in st.session_state:
-    st.session_state["show_patient_form"] = False
-
-# Create appointment log file if missing
-appointments_file = f"{working_dir}/appointments.csv"
-if not os.path.exists(appointments_file):
-    with open(appointments_file, "w") as f:
-        f.write("Username,Doctor Name,Specialization,Date,Time\n")
-
-# Login function
-def login():
-    st.title("🔐 Login")
-
-    if "logged_in" not in st.session_state:
-        st.session_state.logged_in = False
-        st.session_state.username = ""
-
-    if not st.session_state.logged_in:
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-
-        if st.button("Login"):
-            if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
-                st.session_state.logged_in = True
-                st.session_state.username = username
-                st.success(f"Welcome, {username}!")
-                st.experimental_rerun()
-            else:
-                st.error("Invalid credentials")
-    else:
-        st.success(f"Logged in as {st.session_state.username}")
-        if st.button("Logout"):
-            st.session_state.logged_in = False
-            st.session_state.username = ""
-            st.experimental_rerun()
+    st.session_state["appointment_details"] = {}
 
 # Time conversion helpers
 def convert_to_24hr(time_str):
@@ -99,9 +63,24 @@ def is_available_on_date(date, days, start_hr, end_hr):
     hour = date.hour
     return (day in days) and (start_hr <= hour < end_hr)
 
-def save_appointment(user, doctor, specialty, date, time):
+def save_appointment(name, age, contact, doctor, specialty, date, time):
     with open(appointments_file, "a") as f:
-        f.write(f"{user},{doctor},{specialty},{date},{time}\n")
+        f.write(f"{name},{age},{contact},{doctor},{specialty},{date},{time}\n")
+
+def show_patient_details_form():
+    st.subheader("Enter Patient Details")
+
+    with st.form("patient_form"):
+        name = st.text_input("Full Name")
+        age = st.number_input("Age", min_value=0, step=1)
+        contact = st.text_input("Contact Number")
+        confirm = st.form_submit_button("Confirm Appointment")
+
+        if confirm:
+            details = st.session_state["appointment_details"]
+            save_appointment(name, age, contact, details["doctor"], details["specialty"], details["date"], details["time"])
+            st.success(f"✅ Appointment confirmed with Dr. {details['doctor']} on {details['date']} at {details['time']}.")
+            st.session_state["appointment_details"] = {}  # reset
 
 def show_doctor_booking():
     st.subheader("Book an Appointment")
@@ -134,7 +113,7 @@ def show_doctor_booking():
             st.error(f"Invalid availability format for {doctor}.")
             continue
 
-        st.write(f"📅 **Days:** {', '.join(days)}")
+        st.write(f"🗓️ **Days:** {', '.join(days)}")
         st.write(f"⏰ **Time:** {start_hr}:00 - {end_hr}:00")
 
         with st.form(key=f"form_{idx}"):
@@ -145,48 +124,25 @@ def show_doctor_booking():
             if submitted:
                 dt_combined = datetime.combine(appt_date, appt_time)
                 if is_available_on_date(dt_combined, days, start_hr, end_hr):
-                    save_appointment(st.session_state.username, doctor, specialty, appt_date, appt_time.strftime('%H:%M'))
-                    st.success(f"Appointment booked successfully!")
+                    st.session_state["appointment_details"] = {
+                        "doctor": doctor,
+                        "specialty": specialty,
+                        "date": appt_date,
+                        "time": appt_time.strftime('%H:%M')
+                    }
+                    show_patient_details_form()
                 else:
                     st.error("Doctor not available on selected date/time")
 
-# --- MAIN EXECUTION FLOW ---
-login()
+with st.sidebar:
+    selected = option_menu(
+        'Multiple Disease Prediction System',
+        ['Diabetes Prediction', 'Heart Disease Prediction', "Parkinson's Prediction", "Kidney Disease Prediction"],
+        menu_icon='hospital-fill',
+        icons=['activity', 'heart', 'person', 'droplet'],
+        default_index=0
+    )
 
-if st.session_state.get("logged_in"):
-    with st.sidebar:
-        selected = option_menu(
-            'Multiple Disease Prediction System',
-            ['Diabetes Prediction', 'Heart Disease Prediction', "Parkinson's Prediction", "Kidney Disease Prediction"],
-            menu_icon='hospital-fill',
-            icons=['activity', 'heart', 'person', 'droplet'],
-            default_index=0
-        )
-
-
-# Function to show patient details form
-def show_patient_details_form():
-    st.subheader("Enter Patient Details")
-
-    with st.form("patient_form"):
-        patient_name = st.text_input("Full Name")
-        patient_age = st.number_input("Age", min_value=0, step=1)
-        patient_contact = st.text_input("Contact Number")
-
-        submit_patient_details = st.form_submit_button("Confirm Appointment")
-
-        if submit_patient_details:
-            st.session_state["final_confirmation"] = {
-                "name": patient_name,
-                "age": patient_age,
-                "contact": patient_contact
-            }
-            st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']}. The doctor will contact you soon.")
-
-if st.session_state["show_patient_form"]:
-    show_patient_details_form()
-elif st.session_state.get("selected_specialty"):
-    show_doctor_booking()
 
 import numpy as np
 
