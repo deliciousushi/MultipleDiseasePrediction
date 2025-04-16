@@ -103,24 +103,26 @@ def show_doctor_booking():
         st.write(f"📅 **Days:** {', '.join(days)}")
         st.write(f"⏰ **Time:** {start_hr}:00 - {end_hr}:00")
 
-        with st.form(key=f"form_{idx}_{uuid.uuid4()}"):
-            appt_date = st.date_input("Select date", min_value=datetime.today().date(), key=f"date_{idx}")
-            appt_time = st.time_input("Select time", key=f"time_{idx}")
+        unique_suffix = uuid.uuid4()
+
+        with st.form(key=f"form_{idx}_{unique_suffix}"):
+            appt_date = st.date_input("Select date", min_value=datetime.today().date(), key=f"date_{idx}_{unique_suffix}")
+            appt_time = st.time_input("Select time", key=f"time_{idx}_{unique_suffix}")
             submitted = st.form_submit_button("Book Appointment")
 
-            if submitted:
-                dt_combined = datetime.combine(appt_date, appt_time)
-                if is_available_on_date(dt_combined, days, start_hr, end_hr):
-                    st.session_state["appointment_details"] = {
-                        "doctor": doctor,
-                        "specialty": specialty,
-                        "date": appt_date,
-                        "time": appt_time.strftime('%H:%M')
-                    }
-                    st.session_state["show_patient_form"] = True
-                    st.rerun()
-                else:
-                    st.error("Doctor not available on selected date/time")
+        if submitted:
+            dt_combined = datetime.combine(appt_date, appt_time)
+            if is_available_on_date(dt_combined, days, start_hr, end_hr):
+                st.session_state["appointment_details"] = {
+                    "doctor": doctor,
+                    "specialty": specialty,
+                    "date": appt_date.strftime('%Y-%m-%d'),
+                    "time": appt_time.strftime('%H:%M')
+                }
+                st.session_state["show_patient_form"] = True
+                st.experimental_rerun()
+            else:
+                st.error("Doctor not available on selected date/time")
 
 
 def show_patient_details_form():
