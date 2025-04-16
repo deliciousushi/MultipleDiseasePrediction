@@ -7,42 +7,74 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from tensorflow import keras
 
-# Set page configuration
-st.set_page_config(page_title="Health Assistant", layout="wide", page_icon="🧑‍⚕️")
+# Page config
+st.set_page_config(page_title="Health Assistant", layout="wide", page_icon="👩‍⚕️")
 
-# Getting the working directory
+# Working directory
 working_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Load trained models
+# Load models
 diabetes_model = pickle.load(open(f'{working_dir}/diabetes_model.sav', 'rb'))
 heart_disease_model = pickle.load(open(f'{working_dir}/heart_disease_model.sav', 'rb'))
 parkinsons_model = pickle.load(open(f'{working_dir}/parkinsons_model.sav', 'rb'))
-with open("kidney_model (2).sav", "rb") as f:
+with open(f"{working_dir}/kidney_model (2).sav", "rb") as f:
     kidney_model = pickle.load(f)
 
 # Load doctor data
 doctor_file = f'{working_dir}/doctors_list (1).csv'
-if os.path.exists(doctor_file):
-    doctor_data = pd.read_csv(doctor_file)
-else:
-    doctor_data = pd.DataFrame(columns=["Doctor Name", "Specialty", "Location", "Contact", "Availability"])
+doctor_data = pd.read_csv(doctor_file) if os.path.exists(doctor_file) else pd.DataFrame(columns=["Doctor Name", "Specialty", "Location", "Contact", "Availability"])
 
-# Ensure doctor_data and specialty are stored in session state
+# Load credentials
+USER_CREDENTIALS = {
+    "alok": "1234",
+    "rahul": "abcd",
+    "test": "test"
+}
+
+# Ensure session state
 if "doctor_data" not in st.session_state:
     st.session_state["doctor_data"] = doctor_data
 if "selected_specialty" not in st.session_state:
     st.session_state["selected_specialty"] = None
+if "appointment_details" not in st.session_state:
+    st.session_state["appointment_details"] = None
+if "show_patient_form" not in st.session_state:
+    st.session_state["show_patient_form"] = False
 
+# Create appointment log file if missing
+appointments_file = f"{working_dir}/appointments.csv"
+if not os.path.exists(appointments_file):
+    with open(appointments_file, "w") as f:
+        f.write("Username,Doctor Name,Specialization,Date,Time\n")
 
-# Sidebar navigation
-with st.sidebar:
-    selected = option_menu('Multiple Disease Prediction System',
-                           ['Diabetes Prediction', 'Heart Disease Prediction', "Parkinson's Prediction", "Kidney Disease Prediction"],
-                           menu_icon='hospital-fill',
-                           icons=['activity', 'heart', 'person', 'droplet'],
-                           default_index=0)
+# Login function
+def login():
+    st.title("🔐 Login")
 
-# Convert 12-hour time format to 24-hour integer
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+        st.session_state.username = ""
+
+    if not st.session_state.logged_in:
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+
+        if st.button("Login"):
+            if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.success(f"Welcome, {username}!")
+                st.experimental_rerun()
+            else:
+                st.error("Invalid credentials")
+    else:
+        st.success(f"Logged in as {st.session_state.username}")
+        if st.button("Logout"):
+            st.session_state.logged_in = False
+            st.session_state.username = ""
+            st.experimental_rerun()
+
+# Time conversion helpers
 def convert_to_24hr(time_str):
     time_str = time_str.strip().lower()
     if "am" in time_str:
@@ -52,55 +84,25 @@ def convert_to_24hr(time_str):
         hour = int(time_str.replace("pm", "").strip())
         return hour if hour == 12 else hour + 12
     return None
-    
-# Ensure session state keys are initialized
-if "appointment_details" not in st.session_state:
-    st.session_state["appointment_details"] = None
-if "show_patient_form" not in st.session_state:
-    st.session_state["show_patient_form"] = False
 
-# Extract availability details
 def extract_availability(availability_str):
     try:
-        parts = availability_str.split(" ")
-        days_str = parts[0]  # "Mon-Fri"
-        time_range = parts[1]  # "9am-5pm"
-
-        available_days = days_str.split("-")
-        start_time, end_time = time_range.split("-")
-
-        start_hour = convert_to_24hr(start_time)
-        end_hour = convert_to_24hr(end_time)
-
-        return available_days, start_hour, end_hour
-    except ValueError:
+        days_part, time_part = availability_str.split(" ")
+        available_days = days_part.split("-")
+        start_time, end_time = time_part.split("-")
+        return available_days, convert_to_24hr(start_time), convert_to_24hr(end_time)
+    except:
         return None, None, None
 
-# Check if doctor is available on the selected date (both day of week and time)
-def is_available_on_date(appointment_date, available_days, start_hour, end_hour):
-    # Get the weekday as a three-letter abbreviation (e.g., "Mon", "Tue")
-    day_name = appointment_date.strftime('%a')  # Abbreviated day name (e.g., "Mon")
-    
-    # Check if the doctor is available on that day
-    if day_name not in available_days:
-        return False  # Not available on that day
+def is_available_on_date(date, days, start_hr, end_hr):
+    day = date.strftime('%a')
+    hour = date.hour
+    return (day in days) and (start_hr <= hour < end_hr)
 
-    # Ensure the appointment time falls within the doctor's available hours
-    appointment_hour = appointment_date.hour
-    if start_hour <= appointment_hour < end_hour:
-        return True
-    return False
+def save_appointment(user, doctor, specialty, date, time):
+    with open(appointments_file, "a") as f:
+        f.write(f"{user},{doctor},{specialty},{date},{time}\n")
 
-# Function to handle booking an appointment
-def book_appointment(doctor_name, appointment_date):
-    st.session_state["appointment_details"] = {
-        "doctor": doctor_name,
-        "date": appointment_date.strftime("%Y-%m-%d")
-    }
-    st.session_state["show_patient_form"] = True
-    st.experimental_rerun()  # Forces UI update **while keeping session state intact**
-
-# Function to display doctors & booking form
 def show_doctor_booking():
     st.subheader("Book an Appointment")
 
@@ -112,45 +114,55 @@ def show_doctor_booking():
         return
 
     available_doctors = doctor_data[doctor_data["Specialty"] == specialty]
-    
+
     if available_doctors.empty:
         st.warning("No doctors available for this specialty.")
         return
 
-    for index, row in available_doctors.iterrows():
-        doctor_name = row["Doctor Name"]
+    for idx, row in available_doctors.iterrows():
+        doctor = row["Doctor Name"]
         location = row["Location"]
         contact = row["Contact"]
-        availability_str = row["Availability"]
+        avail_str = row["Availability"]
 
-        st.write(f"**{doctor_name}** - {location}")
+        st.write(f"**{doctor}** - {location}")
         st.write(f"📞 Contact: {contact}")
 
-        available_days, start_hour, end_hour = extract_availability(availability_str)
+        days, start_hr, end_hr = extract_availability(avail_str)
 
-        if available_days is None:
-            st.error(f"Invalid availability format for {doctor_name}.")
+        if not days:
+            st.error(f"Invalid availability format for {doctor}.")
             continue
 
-        st.write(f"📅 **Available Days:** {', '.join(available_days)}")
-        st.write(f"⏰ **Available Times:** {start_hour}:00 - {end_hour}:00")
+        st.write(f"📅 **Days:** {', '.join(days)}")
+        st.write(f"⏰ **Time:** {start_hr}:00 - {end_hr}:00")
 
-        with st.form(key=f"booking_form_{index}"):
-            appointment_date = st.date_input(
-                f"Select a date for {doctor_name}",
-                min_value=datetime.today().date(),
-                key=f"date_{index}"
-            )
-
+        with st.form(key=f"form_{idx}"):
+            appt_date = st.date_input("Select date", min_value=datetime.today().date(), key=f"date_{idx}")
+            appt_time = st.time_input("Select time", key=f"time_{idx}")
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
-                if appointment_date:
-                            available_days = row["Available Days"].split(", ")
-                            if is_available_on_date(appointment_date, available_days):
-                                st.success(f"Appointment booked with Dr. {row['Name']} on {appointment_date.strftime('%Y-%m-%d')}.")
-                            else:
-                                st.error("The selected doctor is not available on the chosen date.")
+                dt_combined = datetime.combine(appt_date, appt_time)
+                if is_available_on_date(dt_combined, days, start_hr, end_hr):
+                    save_appointment(st.session_state.username, doctor, specialty, appt_date, appt_time.strftime('%H:%M'))
+                    st.success(f"Appointment booked with Dr. {doctor} on {appt_date} at {appt_time.strftime('%H:%M')}")
+                else:
+                    st.error("Doctor not available on selected date/time")
+
+# --- MAIN EXECUTION FLOW ---
+login()
+
+if st.session_state.get("logged_in"):
+    with st.sidebar:
+        selected = option_menu(
+            'Multiple Disease Prediction System',
+            ['Diabetes Prediction', 'Heart Disease Prediction', "Parkinson's Prediction", "Kidney Disease Prediction"],
+            menu_icon='hospital-fill',
+            icons=['activity', 'heart', 'person', 'droplet'],
+            default_index=0
+        )
+
 
 # Function to show patient details form
 def show_patient_details_form():
