@@ -169,11 +169,10 @@ def show_patient_details_form():
             }
             st.success(f"✅ Appointment confirmed with {st.session_state['appointment_details']['doctor']} on {st.session_state['appointment_details']['date']}. The doctor will contact you soon.")
 
-# ✅ If an appointment is booked, show patient form, otherwise show doctor booking
 if st.session_state["show_patient_form"]:
     show_patient_details_form()
-else:
-    show_doctor_booking(specialty,doctor_data)
+elif st.session_state.get("selected_specialty"):
+    show_doctor_booking()
 
 import numpy as np
 
