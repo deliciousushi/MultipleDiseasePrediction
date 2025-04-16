@@ -145,10 +145,12 @@ def show_doctor_booking():
             submitted = st.form_submit_button("Book Appointment")
 
             if submitted:
-                if is_available_on_date(appointment_date, available_days):
-                    book_appointment(doctor_name, appointment_date)
-                else:
-                    st.warning(f"⚠️ {doctor_name} is not available on {appointment_date.strftime('%A')}.")
+                if appointment_date:
+                            available_days = doctor["Available Days"].split(", ")
+                            if is_available_on_date(appointment_date, available_days):
+                                st.success(f"Appointment booked with Dr. {doctor['Name']} on {appointment_date.strftime('%Y-%m-%d')}.")
+                            else:
+                                st.error("The selected doctor is not available on the chosen date.")
 
 # Function to show patient details form
 def show_patient_details_form():
