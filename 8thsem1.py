@@ -119,7 +119,7 @@ def show_doctor_booking():
             st.error(f"Invalid availability format for {doctor}.")
             continue
 
-        st.write(f"📅 **Days:** {', '.join(days)}")
+        st.write(f"📅 **Days:** {'- '.join(days)}")
         st.write(f"⏰ **Time:** {start_hr}:00 - {end_hr}:00")
 
         appt_date = st.date_input(f"Select date for {doctor}", min_value=datetime.today().date(), key=f"date_{idx}")
