@@ -100,25 +100,15 @@ def is_available_on_date(date, days, start_hr, end_hr):
 
 
 def save_appointment(patient_name, patient_age, patient_contact, doctor, specialty, appt_date, appt_time):
-    # Use '/tmp' directory
-    appointments_file = "/tmp/appointments.csv"
-    
-    # Check if the file exists. If not, create with header
-    file_exists = os.path.exists(appointments_file)
-    
-    # Prepare the new entry
+    local_file = "appointments.csv"  # Save to the local working directory
     new_entry = f"{patient_name},{patient_age},{patient_contact},{doctor},{specialty},{appt_date},{appt_time}\n"
     
-    try:
-        with open(appointments_file, "a") as f:
-            if not file_exists:
-                # Write the header if the file is new
-                f.write("Patient Name,Age,Contact,Doctor,Specialty,Date,Time\n")
-            f.write(new_entry)  # Append the new appointment
+    # Save the appointment data to a local file
+    with open(local_file, "a") as f:
+        f.write(new_entry)
 
-        st.success("✅ Appointment saved successfully.")
-    except Exception as e:
-        st.error(f"❌ Failed to save appointment: {e}")
+    st.success(f"✅ Appointment saved locally at {local_file}")
+
         
 def show_doctor_booking():
     st.subheader("Book an Appointment")
