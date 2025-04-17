@@ -100,10 +100,15 @@ def is_available_on_date(date, days, start_hr, end_hr):
 
 
 def save_appointment(patient_name, patient_age, patient_contact, doctor, specialty, appt_date, appt_time):
-    appointments_file = f"{working_dir}/appointments.csv"
+    appointments_file = "/mount/appointments.csv"
     new_entry = f"{patient_name},{patient_age},{patient_contact},{doctor},{specialty},{appt_date},{appt_time}\n"
-    with open(appointments_file, "a") as f:
-        f.write(new_entry)
+    
+    try:
+        with open(appointments_file, "a") as f:
+            f.write(new_entry)
+        st.success("✅ Appointment saved successfully.")
+    except Exception as e:
+        st.error(f"❌ Failed to save appointment: {e}")
 
 def show_doctor_booking():
     st.subheader("Book an Appointment")
