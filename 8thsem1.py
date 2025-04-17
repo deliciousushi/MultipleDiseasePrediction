@@ -50,20 +50,38 @@ def convert_to_24hr(time_str):
         hour = int(time_str.replace("pm", "").strip())
         return hour if hour == 12 else hour + 12
     return None
+    
+def expand_day_range(start_day, end_day):
+    week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    try:
+        start_idx = week.index(start_day)
+        end_idx = week.index(end_day)
+        if start_idx <= end_idx:
+            return week[start_idx:end_idx + 1]
+        else:
+            return week[start_idx:] + week[:end_idx + 1]
+    except ValueError:
+        return []
 
 def extract_availability(availability_str):
     try:
         days_part, time_part = availability_str.split(" ")
-        available_days = days_part.split("-")
+        start_day, end_day = days_part.split("-")
+        available_days = expand_day_range(start_day, end_day)
+
         start_time, end_time = time_part.split("-")
         return available_days, convert_to_24hr(start_time), convert_to_24hr(end_time)
     except:
         return None, None, None
 
 def is_available_on_date(date, days, start_hr, end_hr):
+    if not all([days, start_hr is not None, end_hr is not None]):
+        return False
+
     day = date.strftime('%a')
     hour = date.hour
-    return (day in days) and (start_hr <= hour < end_hr)
+    return day in days and start_hr <= hour < end_hr
+
 
 def save_appointment(patient_name, patient_age, patient_contact, doctor, specialty, appt_date, appt_time):
     appointments_file = f"{working_dir}/appointments.csv"
