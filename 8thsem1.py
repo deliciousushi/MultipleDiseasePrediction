@@ -62,16 +62,32 @@ def expand_day_range(start_day, end_day):
             return week[start_idx:] + week[:end_idx + 1]
     except ValueError:
         return []
+        
+def full_day_to_short(day):
+    mapping = {
+        "Monday": "Mon", "Tuesday": "Tue", "Wednesday": "Wed",
+        "Thursday": "Thu", "Friday": "Fri", "Saturday": "Sat", "Sunday": "Sun"
+    }
+    return mapping.get(day, day)
 
 def extract_availability(availability_str):
     try:
-        days_part, time_part = availability_str.split(" ")
-        start_day, end_day = days_part.split("-")
-        available_days = expand_day_range(start_day, end_day)
+        # Split into days and times
+        parts = availability_str.strip().split(" ")
+        day_range = parts[0].split("-")
+        time_range = parts[1].split("-")
 
-        start_time, end_time = time_part.split("-")
-        return available_days, convert_to_24hr(start_time), convert_to_24hr(end_time)
-    except:
+        # Convert full day names to short ones
+        start_day = full_day_to_short(day_range[0])
+        end_day = full_day_to_short(day_range[1])
+        days = expand_day_range(start_day, end_day)
+
+        # Convert times
+        start_time = convert_to_24hr(time_range[0])
+        end_time = convert_to_24hr(time_range[1])
+        return days, start_time, end_time
+    except Exception as e:
+        print(f"Availability parsing error: {e}")
         return None, None, None
 
 def is_available_on_date(date, days, start_hr, end_hr):
@@ -119,7 +135,7 @@ def show_doctor_booking():
             st.error(f"Invalid availability format for {doctor}.")
             continue
 
-        st.write(f"📅 **Days:** {'- '.join(days)}")
+        st.write(f"📅 **Days:** {', '.join(days)}")
         st.write(f"⏰ **Time:** {start_hr}:00 - {end_hr}:00")
 
         appt_date = st.date_input(f"Select date for {doctor}", min_value=datetime.today().date(), key=f"date_{idx}")
