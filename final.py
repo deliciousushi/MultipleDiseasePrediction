@@ -107,7 +107,7 @@ def save_appointment(patient_name, patient_age, patient_contact, doctor, special
     with open(local_file, "a") as f:
         f.write(new_entry)
 
-    st.success(f"✅ Appointment saved locally at {local_file}")
+    st.success(f"✅ Appointment saved")
 
         
 def show_doctor_booking():
